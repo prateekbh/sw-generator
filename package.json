@@ -1,0 +1,32 @@
+{
+  "name": "sw-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebuild": "tsc -p src/tsconfig.json --resolveJsonModule",
+    "build": "rollup --config config/rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prateekbh/sw-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prateekbh/sw-generator/issues"
+  },
+  "homepage": "https://github.com/prateekbh/sw-generator#readme",
+  "devDependencies": {
+    "lint-staged": "7.3.0",
+    "prettier": "1.14.3",
+    "rollup": "0.66.6",
+    "rollup-plugin-replace": "2.1.0",
+    "typescript": "3.1.2",
+    "workbox-build": "3.6.2",
+    "workbox-core": "3.6.2",
+    "workbox-sw": "3.6.2"
+  }
+}
