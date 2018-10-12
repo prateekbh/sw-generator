@@ -6,7 +6,7 @@ export default {
     output: {
       name: 'AmpServiceWorker',
       format: 'es',
-      file: 'output/build/index.js',
+      file: 'build/index.js',
       sourceMap: true,
     },
     plugins: [
