@@ -8,7 +8,3 @@ function ampAssetsCaching() {
 // Add the import script for workbox
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.6.2/workbox-sw.js');
 ampAssetsCaching();
-
-self.addEventListener('activate', () => {
-  self.clients.claim();
-});

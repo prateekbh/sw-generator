@@ -1,11 +1,12 @@
-const selenium = require('selenium-webdriver');
 const seleniumAssistant = require('selenium-assistant');
 const serve = require('serve');
 const path = require('path');
+const Mocha = require('mocha');
+const chai = require('chai');
 
 const serveDir = path.join(__dirname, '../');
 server = serve(serveDir, {
-    port: 16969,
+    port: 6881,
 });
 
 const browsers = seleniumAssistant.getLocalBrowsers();
@@ -19,14 +20,37 @@ browsers.forEach(browser => {
   if(browser.getPrettyName() !== "Google Chrome Stable") {
       return;
   }
-
   browser.getSeleniumDriver()
-  .then(driver =>
-    driver.get('http://localhost:16969/test/amp-caching/index.html')
-    .then(() => {
-        server.stop();
-        return seleniumAssistant.killWebDriver(driver);
-
+    .then(async (driver) => {
+      return driver.get('http://localhost:6881/test/index.html')
     })
-  );
+    .then(async () => {
+      const driver = await browser.getSeleniumDriver();
+      runMochaForBrowser(browser, driver);
+    }).catch(async (err) => {
+      console.error(err);
+      seleniumAssistant.killWebDriver(await browser.getSeleniumDriver());
+      //server.stop();
+    })
 });
+
+
+function runMochaForBrowser(browser, driver) {
+  global.__AMPSW = {
+    driver,
+    browser
+  };
+  global.expect = chai.expect;
+  const mocha = new Mocha();
+  mocha.addFile(
+      path.join(__dirname, 'amp-caching', 'amp-caching-test.js')
+  );
+  // Run the tests.
+  mocha.run(function(failures){
+    process.exitCode = failures ? -1 : 0;  // exit with non-zero status if there were failures
+  }).on('end', function() {
+    seleniumAssistant.killWebDriver(driver);
+    //server.stop();
+  });
+}
+
