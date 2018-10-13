@@ -22,9 +22,11 @@ browsers.forEach(browser => {
 
   browser.getSeleniumDriver()
   .then(driver =>
-    driver.get('http://localhost:16969/test/amp-caching/webd.html')
+    driver.get('http://localhost:16969/test/amp-caching/index.html')
     .then(() => {
+        server.stop();
         return seleniumAssistant.killWebDriver(driver);
+
     })
   );
 });
