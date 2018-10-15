@@ -10,28 +10,24 @@ server = serve(serveDir, {
 });
 
 const browsers = seleniumAssistant.getLocalBrowsers();
-browsers.forEach(browser => {
+browsers.forEach((browser) => {
   // Skip if the browser isn't stable.
   if (browser.getReleaseName() !== 'stable') {
     return;
   }
-
   // Print out the browsers name.
   if(browser.getPrettyName() !== "Google Chrome Stable") {
       return;
   }
+
   browser.getSeleniumDriver()
-    .then(async (driver) => {
-      return driver.get('http://localhost:6881/test/index.html')
-    })
-    .then(async () => {
-      const driver = await browser.getSeleniumDriver();
-      runMochaForBrowser(browser, driver);
-    }).catch(async (err) => {
-      console.error(err);
-      seleniumAssistant.killWebDriver(await browser.getSeleniumDriver());
-      server.stop();
-    })
+  .then(async (driver) => {
+    await driver.get('http://localhost:6881/test/index.html');
+    return driver;
+  })
+  .then(async (driver) => {
+    runMochaForBrowser(browser, driver);
+  });
 });
 
 
