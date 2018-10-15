@@ -17,8 +17,6 @@ const outfile = path.join(tempDir, 'build', 'index.js');
 npmRun.sync(`rollup ${filename} --config config/rollup.config.js --file ${outfile}`);
 
 // return the generated SW
-const swText = fs.readFileSync(outfile, {
+return fs.readFileSync(outfile, {
     encoding: 'UTF-8',
 });
-
-return swText;
