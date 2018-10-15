@@ -16,7 +16,7 @@ async function initTest() {
   });
 
   const browsers = seleniumAssistant.getLocalBrowsers();
-  browsers.forEach((browser) => {
+  browsers.forEach(async browser => {
     // Skip if the browser isn't stable.
     if (browser.getReleaseName() !== 'stable') {
       return;
@@ -27,22 +27,16 @@ async function initTest() {
     }
 
     console.log(`testing on ${browser.getPrettyName()}`);
-    browser.getSeleniumDriver()
-    .then(async (driver) => {
-      await driver.get('http://localhost:6881/test/index.html');
-      return driver;
-    })
-    .then(async (driver) => {
-      runMochaForBrowser(browser, driver);
-    });
+    const driver = await browser.getSeleniumDriver();
+    await driver.get('http://localhost:6881/test/index.html');
+    runMochaForBrowser(driver);
   });
 }
 
 
-function runMochaForBrowser(browser, driver) {
+function runMochaForBrowser(driver) {
   global.__AMPSW = {
-    driver,
-    browser
+    driver
   };
   global.expect = chai.expect;
   const mocha = new Mocha();

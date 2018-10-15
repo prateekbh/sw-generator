@@ -31,9 +31,10 @@ describe('Amp caching', function() {
 
   describe('Versioned JS', () => {
     const versionedAmpRuntime = 'https://cdn.ampproject.org/rtv/001525381599226/v0.js';
-    //const versionedAmpExtension = 'https://cdn.ampproject.org/rtv/001525381599226/v0.js';
+    const versionedAmpExtension = 'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js';
+    const filesToTest = [versionedAmpRuntime, versionedAmpRuntime];
 
-    ['https://cdn.ampproject.org/rtv/001525381599226/v0.js', 'https://cdn.ampproject.org/rtv/001525381599226/v0.js'].forEach(() => {
+    filesToTest.forEach(() => {
       it('should create a cache in cache name', async () => {
         let hasVersionJSInCache = await driver.executeAsyncScript(async cb => {
           cb(await caches.has('AMP-SW-CACHE'));

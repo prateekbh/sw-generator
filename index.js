@@ -2,7 +2,6 @@ const tmp = require('tmp');
 const npmRun = require('npm-run');
 const fs= require('fs');
 const path = require('path');
-const chalk = require('chalk');
 
 const tmpobj = tmp.dirSync();
 const tempDir = tmpobj.name;

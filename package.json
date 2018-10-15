@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test/index.js",
+    "test": "node --harmony ./test/index.js",
     "run": "node ./index.js"
   },
   "repository": {
