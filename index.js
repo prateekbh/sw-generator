@@ -9,13 +9,9 @@ import {devDependencies} from './package.json'
 export async function buildSW() {
   const createTempDir = promisify(dir);
   const tempDir = await createTempDir({});
-
   // Transpile TSC in a temp dir
   npmRun.sync(`tsc -p ./src/tsconfig.json --outDir ${tempDir}`);
-
   const filename = join(tempDir, 'index.js');
-
-  debugger;
   // rollup the files in the tempdir
   const bundle = await rollup({
     input: filename,
@@ -25,7 +21,6 @@ export async function buildSW() {
       })
     ]
   });
-
   const {code} = await bundle.generate({
     name: 'AmpServiceWorker',
     format: 'es',
