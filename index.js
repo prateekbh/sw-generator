@@ -32,5 +32,5 @@ export async function buildSW() {
     sourceMap: true,
   });
 
-  return code;
+  return code
 }
