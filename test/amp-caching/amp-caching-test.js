@@ -3,15 +3,14 @@ import { promisify } from 'util';
 import { writeFile, unlink } from 'fs';
 import { join } from 'path';
 
-describe('Amp caching', function() {
-  let driver;
+describe('AMP Caching Module', function() {
+  const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
   this.timeout(5000);
 
   before(async () => {
     const generatedSW = await buildSW();
     const promisifiedWriteFile = promisify(writeFile);
-    driver = global.__AMPSW.driver;
     await promisifiedWriteFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
   });

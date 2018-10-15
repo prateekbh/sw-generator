@@ -4,7 +4,7 @@ import { join } from 'path';
 import Mocha from 'mocha';
 import { expect } from 'chai';
 
-async function initTest() {
+(async () => {
   console.log('downloading browsers...');
   const expiration = 24;
   await seleniumAssistant.downloadLocalBrowser('chrome', 'stable', expiration);
@@ -31,7 +31,7 @@ async function initTest() {
     await driver.get('http://localhost:6881/test/index.html');
     runMochaForBrowser(driver, server);
   });
-}
+})();
 
 function runMochaForBrowser(driver, server) {
   global.__AMPSW = {
@@ -50,5 +50,3 @@ function runMochaForBrowser(driver, server) {
       server.stop();
     });
 }
-
-initTest();

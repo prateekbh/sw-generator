@@ -3,7 +3,11 @@ window.__waitForSWState = (registration, desiredState) => {
     let serviceWorker = registration.installing;
 
     if (!serviceWorker) {
-      return reject(new Error('The service worker is not installing. ' + 'Is the test environment clean?'));
+      return reject(
+        new Error(
+          'The service worker is not installing. Is the test environment clean?',
+        ),
+      );
     }
 
     const stateListener = evt => {
