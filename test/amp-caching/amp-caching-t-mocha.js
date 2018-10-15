@@ -3,7 +3,7 @@ describe('AMP-CACHING', () => {
     before(async () => {
       await window.__testCleanup();
       const registration = await navigator.serviceWorker.register('/test/amp-caching-sw.js');
-      await window.__waitForSWState(registration, 'activated')
+      await window.__waitForSWState(registration, 'activated');
     });
     afterEach(async () => {
       await window.__testCleanup();
@@ -21,7 +21,7 @@ describe('AMP-CACHING', () => {
     });
 
     it('should fetch and store the versioned jS', async () => {
-      const cache = await caches.open('AMP-SW-CACHE')
+      const cache = await caches.open('AMP-SW-CACHE');
       const cacheResponse = await cache.match(versionedAmpRuntime);
       chai.expect(cacheResponse).to.not.be.null;
     });
@@ -31,7 +31,7 @@ describe('AMP-CACHING', () => {
       const cache = await caches.open('AMP-SW-CACHE');
       await cache.put(new Request(versionedAmpRuntime), new Response(DUMMY_RESPONSE));
       const response = await fetch(versionedAmpRuntime);
-      const fetchResponse =  await response.text();
+      const fetchResponse = await response.text();
       chai.expect(fetchResponse).to.be.equal(DUMMY_RESPONSE);
     });
   });

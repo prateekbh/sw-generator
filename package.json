@@ -22,6 +22,7 @@
     "@types/workbox-sw": "3.2.0",
     "chai": "4.2.0",
     "chromedriver": "^2.42.0",
+    "husky": "^1.1.2",
     "karma": "3.0.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.2.0",
@@ -43,5 +44,21 @@
     "workbox-core": "3.6.2",
     "workbox-sw": "3.6.2"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --config config/.prettierrc ",
+      "git add"
+    ],
+    "test/**/*.js": [
+      "prettier --config config/.prettierrc ",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test && npm run size"
+    }
+  }
 }

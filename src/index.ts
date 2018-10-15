@@ -1,4 +1,4 @@
-import {ampAssetsCaching} from './modules/amp-caching/index';
+import { ampAssetsCaching } from './modules/amp-caching/index';
 declare function importScripts(...urls: string[]): void;
 
 // Add the import script for workbox
