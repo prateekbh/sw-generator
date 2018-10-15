@@ -9,6 +9,10 @@ import { devDependencies } from './package.json';
 export async function buildSW() {
   const createTempDir = promisify(dir);
   const tempDir = await createTempDir({});
+
+  // Waiting for TSC API to be stable as it is not currentlt.
+  // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
+
   // Transpile TSC in a temp dir
   npmRun.sync(`tsc -p ./src/tsconfig.json --outDir ${tempDir}`);
   const filename = join(tempDir, 'index.js');
