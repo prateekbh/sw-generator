@@ -2,5 +2,6 @@
   "printWidth": 80,
   "trailingComma": "all",
   "parser": "typescript",
-  "singleQuote": true
+  "singleQuote": true,
+  "semi": true,
 }
