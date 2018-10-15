@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --harmony ./test/index.js",
-    "run": "node ./index.js"
+    "test": "node -r esm ./test/index.js",
+    "start": "node -r esm --inspect-brk ./index.js"
   },
   "repository": {
     "type": "git",
@@ -19,14 +19,17 @@
   },
   "homepage": "https://github.com/prateekbh/sw-generator#readme",
   "devDependencies": {
+    "@types/tmp": "0.0.33",
     "@types/workbox-sw": "3.2.0",
     "chai": "4.2.0",
     "chromedriver": "^2.42.0",
+    "esm": "^3.0.84",
     "husky": "^1.1.2",
     "lint-staged": "7.3.0",
     "mocha": "5.2.0",
     "npm-run": "^5.0.1",
     "prettier": "1.14.3",
+    "promisify": "0.0.3",
     "puppeteer": "1.9.0",
     "rollup": "0.66.6",
     "rollup-plugin-replace": "2.1.0",
@@ -41,11 +44,11 @@
   "dependencies": {},
   "lint-staged": {
     "src/**/*.ts": [
-      "prettier --config config/.prettierrc ",
+      "prettier --config ./config/prettierrc ",
       "git add"
     ],
     "test/**/*.js": [
-      "prettier --config config/.prettierrc ",
+      "prettier --config ./config/prettierrc ",
       "git add"
     ]
   },

@@ -17,7 +17,7 @@
       "alwaysStrict": true
     },
     "include": [
-      "src/*.ts",
-      "src/**/*.ts"
+      "*.ts",
+      "**/*.ts"
     ]
   }
