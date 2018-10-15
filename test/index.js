@@ -30,7 +30,7 @@ browsers.forEach(browser => {
     }).catch(async (err) => {
       console.error(err);
       seleniumAssistant.killWebDriver(await browser.getSeleniumDriver());
-      //server.stop();
+      server.stop();
     })
 });
 
@@ -50,7 +50,7 @@ function runMochaForBrowser(browser, driver) {
     process.exitCode = failures ? -1 : 0;  // exit with non-zero status if there were failures
   }).on('end', function() {
     seleniumAssistant.killWebDriver(driver);
-    //server.stop();
+    server.stop();
   });
 }
 
