@@ -1,10 +1,10 @@
-import {dir} from 'tmp';
+import { dir } from 'tmp';
 import npmRun from 'npm-run';
-import {join} from 'path';
-import {rollup} from 'rollup';
-import {promisify} from 'util';
+import { join } from 'path';
+import { rollup } from 'rollup';
+import { promisify } from 'util';
 import replace from 'rollup-plugin-replace';
-import {devDependencies} from './package.json'
+import { devDependencies } from './package.json';
 
 export async function buildSW() {
   const createTempDir = promisify(dir);
@@ -17,15 +17,14 @@ export async function buildSW() {
     input: filename,
     plugins: [
       replace({
-          __WORKBOX__VERSION__: devDependencies['workbox-sw']
-      })
-    ]
+        __WORKBOX__VERSION__: devDependencies['workbox-sw'],
+      }),
+    ],
   });
-  const {code} = await bundle.generate({
+  const { code } = await bundle.generate({
     name: 'AmpServiceWorker',
     format: 'es',
     sourceMap: true,
   });
-
-  return code
+  return code;
 }
