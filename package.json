@@ -43,12 +43,16 @@
   },
   "dependencies": {},
   "lint-staged": {
+    "./index.js": [
+      "prettier --config ./config/.prettierrc ",
+      "git add"
+    ],
     "src/**/*.ts": [
-      "prettier --config ./config/prettierrc ",
+      "prettier --config ./config/.prettierrc ",
       "git add"
     ],
     "test/**/*.js": [
-      "prettier --config ./config/prettierrc ",
+      "prettier --config ./config/.prettierrc ",
       "git add"
     ]
   },
