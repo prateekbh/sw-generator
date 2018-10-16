@@ -1,10 +1,10 @@
 import { buildSW } from '../../index';
 import { promisify } from 'util';
-import { writeFile, unlink } from 'fs';
+import * as fs from 'fs';
 import { join } from 'path';
 
-const promisifiedWriteFile = promisify(writeFile);
-const promisifiedUnlink = promisify(unlink);
+const writeFile = promisify(fs.writeFile);
+const unlink = promisify(fs.unlink);
 
 describe('AMP Caching Module', function() {
   const driver = global.__AMPSW.driver;
@@ -13,12 +13,12 @@ describe('AMP Caching Module', function() {
 
   before(async () => {
     const generatedSW = await buildSW();
-    await promisifiedWriteFile(serviceWorkerPath, generatedSW);
+    await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
   });
 
   after(async () => {
-    await promisifiedUnlink(serviceWorkerPath);
+    await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
@@ -32,6 +32,7 @@ describe('AMP Caching Module', function() {
       cb();
     });
     await driver.navigate().refresh();
+    // This refresh is so that SW claims the client
     await new Promise(resolve => setTimeout(resolve, 100));
     const swRegCount = await driver.executeAsyncScript(async cb => {
       const regs = await navigator.serviceWorker.getRegistrations();
@@ -51,8 +52,8 @@ describe('AMP Caching Module', function() {
     const ampRuntime = 'https://cdn.ampproject.org/rtv/001525381599226/v0.js';
     const ampExtension =
       'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js';
-    const filesToTest = [ampRuntime, ampRuntime];
 
+    const filesToTest = [ampRuntime, ampExtension];
     filesToTest.forEach(scriptURL => {
       it('should create a cache in cache name, once fetched', () =>
         checkCacheCreation(driver, scriptURL));
