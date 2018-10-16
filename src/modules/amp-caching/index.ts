@@ -1,7 +1,7 @@
 import _workbox from 'workbox-sw';
 declare const workbox: typeof _workbox;
 
-export function ampAssetsCaching() {
+export function ampAssetsCaching(): void {
   const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
   const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
