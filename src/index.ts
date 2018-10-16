@@ -1,4 +1,5 @@
 import { ampAssetsCaching } from './modules/amp-caching/index';
+import 'workbox-core';
 
 // Add the import script for workbox
 importScripts(

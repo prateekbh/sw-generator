@@ -5,6 +5,7 @@ import { rollup } from 'rollup';
 import { promisify } from 'util';
 import replace from 'rollup-plugin-replace';
 import { devDependencies } from './package.json';
+import resolve from 'rollup-plugin-node-resolve';
 
 export async function buildSW() {
   const createTempDir = promisify(dir);
@@ -13,15 +14,17 @@ export async function buildSW() {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
-  npmRun.sync(`tsc -p ./src/tsconfig.json --outDir ${tempDir}`);
-  
+  npmRun.sync(`tsc -p ./src/tsconfig.json --outDir output`);
+
   // rollup the files in the tempdir
   const bundle = await rollup({
-    input: join(tempDir, 'index.js'),
+    input: join('output', 'index.js'),
     plugins: [
       replace({
         __WORKBOX__VERSION__: devDependencies['workbox-sw'],
+        'process.env.NODE_ENV': "'production'",
       }),
+      resolve({}),
     ],
   });
   const { code } = await bundle.generate({
@@ -29,6 +32,6 @@ export async function buildSW() {
     format: 'es',
     sourceMap: true,
   });
-  
+
   return code;
 }
