@@ -6,21 +6,23 @@ export function ampAssetsCaching() {
     cacheName: 'AMP-SW-CACHE',
   };
   const { cacheFirst, staleWhileRevalidate } = workbox.strategies;
-  const registerRoute = workbox.routing.registerRoute;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
 
   // Versioned Assets
-  registerRoute(
+  workbox.routing.registerRoute(
     /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//,
     cacheFirst(CACHE_OPTIONS),
   );
 
   // Unversioned runtimes
-  registerRoute(
+  workbox.routing.registerRoute(
     /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/,
     staleWhileRevalidate(CACHE_OPTIONS),
   );
 
   // Unversioned Extensions
-  registerRoute(unversionedExtensionsRE, staleWhileRevalidate(CACHE_OPTIONS));
+  workbox.routing.registerRoute(
+    unversionedExtensionsRE,
+    staleWhileRevalidate(CACHE_OPTIONS),
+  );
 }

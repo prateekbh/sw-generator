@@ -31,9 +31,8 @@ describe('AMP Caching Module', function() {
       await window.__waitForSWState(registration, 'activated');
       cb();
     });
-    await driver.navigate().refresh();
     // This refresh is so that SW claims the client
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await driver.navigate().refresh();
     const swRegCount = await driver.executeAsyncScript(async cb => {
       const regs = await navigator.serviceWorker.getRegistrations();
       cb(regs.length);
