@@ -10,15 +10,14 @@ export async function buildSW() {
   const createTempDir = promisify(dir);
   const tempDir = await createTempDir({});
 
-  // Waiting for TSC API to be stable as it is not currentlt.
+  // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
-
-  // Transpile TSC in a temp dir
+  // Until then, use npm to transpile Typescript into a temp directory.
   npmRun.sync(`tsc -p ./src/tsconfig.json --outDir ${tempDir}`);
-  const filename = join(tempDir, 'index.js');
+  
   // rollup the files in the tempdir
   const bundle = await rollup({
-    input: filename,
+    input: join(tempDir, 'index.js'),
     plugins: [
       replace({
         __WORKBOX__VERSION__: devDependencies['workbox-sw'],
@@ -30,5 +29,6 @@ export async function buildSW() {
     format: 'es',
     sourceMap: true,
   });
+  
   return code;
 }
