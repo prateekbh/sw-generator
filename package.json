@@ -38,7 +38,6 @@
     "rollup-plugin-replace": "2.1.0",
     "selenium-assistant": "5.3.0",
     "serve": "6.5.1",
-    "tmp": "0.0.33",
     "typescript": "3.1.2",
     "workbox-build": "3.6.2",
     "workbox-core": "3.6.2",
