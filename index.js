@@ -6,6 +6,7 @@ import { promisify } from 'util';
 import replace from 'rollup-plugin-replace';
 import { devDependencies } from './package.json';
 import resolve from 'rollup-plugin-node-resolve';
+import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
 export async function buildSW() {
   const createTempDir = promisify(dir);
@@ -25,6 +26,10 @@ export async function buildSW() {
         'process.env.NODE_ENV': "'production'",
       }),
       resolve({}),
+      compiler({
+        compilation_level: 'ADVANCED',
+        jscomp_off: 'checkVars',
+      }),
     ],
   });
   const { code } = await bundle.generate({

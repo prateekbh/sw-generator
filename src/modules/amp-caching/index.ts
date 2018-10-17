@@ -7,17 +7,17 @@ export function ampAssetsCaching() {
   const CACHE_OPTIONS = {
     cacheName: 'AMP-SW-CACHE',
   };
+
+  const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
+  const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
 
   // Versioned Assets
-  router.registerRoute(
-    /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//,
-    new CacheFirst(CACHE_OPTIONS),
-  );
+  router.registerRoute(versionedAssetsRE, new CacheFirst(CACHE_OPTIONS));
 
   // Unversioned runtimes
   router.registerRoute(
-    /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/,
+    unversionedRuntimeRE,
     new StaleWhileRevalidate(CACHE_OPTIONS),
   );
 
