@@ -1,26 +1,29 @@
-import _workbox from 'workbox-sw';
-declare const workbox: typeof _workbox;
+// @ts-ignore
+import router from 'workbox-routing';
+// @ts-ignore
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 
-export function ampAssetsCaching(): void {
+export function ampAssetsCaching() {
+  const CACHE_OPTIONS = {
+    cacheName: 'AMP-SW-CACHE',
+  };
+
   const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
   const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
-  workbox.routing.registerRoute(
-    versionedAssetsRE,
-    workbox.strategies.cacheFirst({
-      cacheName: 'AMP-SW-CACHE',
-    }),
-  );
-  workbox.routing.registerRoute(
+
+  // Versioned Assets
+  router.registerRoute(versionedAssetsRE, new CacheFirst(CACHE_OPTIONS));
+
+  // Unversioned runtimes
+  router.registerRoute(
     unversionedRuntimeRE,
-    workbox.strategies.staleWhileRevalidate({
-      cacheName: 'AMP-SW-CACHE',
-    }),
+    new StaleWhileRevalidate(CACHE_OPTIONS),
   );
-  workbox.routing.registerRoute(
+
+  // Unversioned Extensions
+  router.registerRoute(
     unversionedExtensionsRE,
-    workbox.strategies.staleWhileRevalidate({
-      cacheName: 'AMP-SW-CACHE',
-    }),
+    new StaleWhileRevalidate(CACHE_OPTIONS),
   );
 }

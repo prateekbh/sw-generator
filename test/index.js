@@ -4,10 +4,18 @@ import { join } from 'path';
 import Mocha from 'mocha';
 import { expect } from 'chai';
 
+const isLocalExecution = process.argv.includes('--local');
+
 (async () => {
-  console.log('downloading browsers...');
   const expiration = 24;
-  await seleniumAssistant.downloadLocalBrowser('chrome', 'stable', expiration);
+  if (!isLocalExecution) {
+    console.log('downloading browsers...');
+    await seleniumAssistant.downloadLocalBrowser(
+      'chrome',
+      'stable',
+      expiration,
+    );
+  }
 
   console.log('starting server...');
   const serveDir = join(__dirname, '../');
