@@ -10,6 +10,16 @@ type PublisherCachingOptions = {
 
 class AmpCachablePlugin {
   cacheWillUpdate({ response }: { response: Response }): Response | null {
+    const responseContentType = response.headers.get('content-type');
+    if (responseContentType && responseContentType.includes('text/html')) {
+      const responseText = await response.text();
+      // if (responseText) has 'amphtml'
+
+      return null;
+    } else {
+      // Non HTML responses will be allowed to be cached
+      return response;
+    }
     return null;
   }
 }
