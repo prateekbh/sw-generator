@@ -1,15 +1,15 @@
-import _workbox from 'workbox-sw';
-declare const workbox: typeof _workbox;
+// @ts-ignore
+import router from 'workbox-routing';
+// @ts-ignore
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 
 type PublisherCachingOptions = {
   allowList: Array<RegExp>;
   denyList?: Array<RegExp>;
 };
 
-type CacheWillUpdateArgs = {};
-
 class AmpCachablePlugin {
-  cacheWillUpdate({  }: { response: Response }): Response | null {
+  cacheWillUpdate({ response }: { response: Response }): Response | null {
     return null;
   }
 }
@@ -18,9 +18,9 @@ export function publisherCaching(
   publisherOptions: PublisherCachingOptions,
 ): void {
   publisherOptions.allowList.forEach(allowURL => {
-    workbox.routing.registerRoute(
+    router.registerRoute(
       allowURL,
-      workbox.strategies.cacheFirst({
+      new CacheFirst({
         cacheName: 'AMP-PUBLISHER-CACHE',
         plugins: [new AmpCachablePlugin()],
       }),
