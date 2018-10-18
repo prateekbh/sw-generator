@@ -7,7 +7,7 @@
     "test": "node -r esm ./test/index.js",
     "test:local": "node -r esm ./test/index.js --local",
     "start": "node -r esm ./index.js",
-    "sample": "node -r esm ./sample/index.js"
+    "sample": "node -r esm ./sample/serve.js"
   },
   "repository": {
     "type": "git",
@@ -41,6 +41,7 @@
     "serve": "6.5.1",
     "typescript": "3.1.2",
     "workbox-build": "3.6.2",
+    "workbox-cache-expiration": "^3.6.2",
     "workbox-core": "3.6.2",
     "workbox-routing": "^3.6.2",
     "workbox-strategies": "^3.6.2",
