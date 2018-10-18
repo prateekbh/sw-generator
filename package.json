@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "tsc -p src/tsconfig.json --resolveJsonModule",
-    "build": "rollup --config config/rollup.config.js"
+    "test": "node -r esm ./test/index.js",
+    "test:local": "node -r esm ./test/index.js --local",
+    "start": "node -r esm ./index.js"
   },
   "repository": {
     "type": "git",
@@ -20,13 +20,46 @@
   },
   "homepage": "https://github.com/prateekbh/sw-generator#readme",
   "devDependencies": {
+    "@types/tmp": "0.0.33",
+    "@types/workbox-sw": "3.2.0",
+    "chai": "4.2.0",
+    "chromedriver": "2.42.0",
+    "esm": "3.0.84",
+    "husky": "1.1.2",
     "lint-staged": "7.3.0",
+    "mocha": "5.2.0",
+    "npm-run": "5.0.1",
     "prettier": "1.14.3",
+    "promisify": "0.0.3",
+    "puppeteer": "1.9.0",
     "rollup": "0.66.6",
     "rollup-plugin-replace": "2.1.0",
+    "selenium-assistant": "5.3.0",
+    "serve": "6.5.1",
+    "tmp": "0.0.33",
     "typescript": "3.1.2",
     "workbox-build": "3.6.2",
     "workbox-core": "3.6.2",
     "workbox-sw": "3.6.2"
+  },
+  "dependencies": {},
+  "lint-staged": {
+    "./index.js": [
+      "prettier --write --config ./config/.prettierrc",
+      "git add"
+    ],
+    "src/**/*.ts": [
+      "prettier --write --config ./config/.prettierrc",
+      "git add"
+    ],
+    "test/**/*.js": [
+      "prettier --write --config ./config/.prettierrc",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
-  "printWidth": 150,
+  "printWidth": 80,
   "trailingComma": "all",
   "parser": "typescript",
-  "singleQuote": true
+  "singleQuote": true,
 }
