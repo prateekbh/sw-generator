@@ -31,7 +31,6 @@ describe('AMP Caching Module', function() {
       await window.__waitForSWState(registration, 'activated');
       cb();
     });
-    await driver.navigate().refresh();
     const swRegCount = await driver.executeAsyncScript(async cb => {
       const regs = await navigator.serviceWorker.getRegistrations();
       cb(regs.length);
@@ -168,10 +167,17 @@ async function checkScriptExistanceInCache(cacheName, driver, scriptURL) {
     async (cacheName, scriptURL, cb) => {
       const response = await fetch(scriptURL);
       const responseText = await response.text();
+      // TODO: find a better solution to this.
+      // Allow script to be put in cache
+      await new Promise(resolve => setTimeout(resolve, 200));
       const cache = await caches.open(cacheName);
       const cacheResponse = await cache.match(scriptURL);
-      const cacheText = await cacheResponse.text();
-      cb(cacheText == responseText);
+      if (cacheResponse) {
+        const cacheText = await cacheResponse.text();
+        cb(cacheText == responseText);
+      } else {
+        cb('No Response found');
+      }
     },
     cacheName,
     scriptURL,

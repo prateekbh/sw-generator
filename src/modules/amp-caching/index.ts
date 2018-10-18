@@ -2,6 +2,8 @@
 import router from 'workbox-routing';
 // @ts-ignore
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+// @ts-ignore
+import { Plugin } from 'workbox-cache-expiration';
 
 export function ampAssetsCaching() {
   const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
@@ -16,6 +18,11 @@ export function ampAssetsCaching() {
     versionedAssetsRE,
     new CacheFirst({
       cacheName: versionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 14 * 24 * 60 * 60, // 14 days
+        }),
+      ],
     }),
   );
 
@@ -24,6 +31,11 @@ export function ampAssetsCaching() {
     unversionedRuntimeRE,
     new StaleWhileRevalidate({
       cacheName: unversionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        }),
+      ],
     }),
   );
 
@@ -32,6 +44,11 @@ export function ampAssetsCaching() {
     unversionedExtensionsRE,
     new StaleWhileRevalidate({
       cacheName: unversionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        }),
+      ],
     }),
   );
 }
