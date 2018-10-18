@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node -r esm ./test/index.js",
     "test:local": "node -r esm ./test/index.js --local",
-    "start": "node -r esm ./index.js"
+    "start": "node -r esm ./index.js",
+    "sample": "node -r esm ./sample/index.js"
   },
   "repository": {
     "type": "git",
