@@ -2,6 +2,8 @@
 import router from 'workbox-routing';
 // @ts-ignore
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+// @ts-ignore
+import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
 
 type PublisherCachingOptions = {
   allowList: Array<RegExp>;
@@ -12,7 +14,7 @@ class AmpCachablePlugin {
   cacheWillUpdate({ response }: { response: Response }): Response | null {
     const responseContentType = response.headers.get('content-type');
     if (responseContentType && responseContentType.includes('text/html')) {
-      const responseText = await response.text();
+      //const responseText = await response.text();
       // if (responseText) has 'amphtml'
 
       return null;
@@ -27,6 +29,7 @@ class AmpCachablePlugin {
 export function publisherCaching(
   publisherOptions: PublisherCachingOptions,
 ): void {
+  enableNagigationPreload();
   publisherOptions.allowList.forEach(allowURL => {
     router.registerRoute(
       allowURL,
