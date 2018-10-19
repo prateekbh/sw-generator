@@ -2,7 +2,6 @@ import npmRun from 'npm-run';
 import { join } from 'path';
 import { rollup } from 'rollup';
 import replace from 'rollup-plugin-replace';
-import { devDependencies } from './package.json';
 import resolve from 'rollup-plugin-node-resolve';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
@@ -17,7 +16,7 @@ export async function buildSW() {
     input: join('output', 'index.js'),
     plugins: [
       replace({
-        __WORKBOX__VERSION__: devDependencies['workbox-sw'],
+        homeURL: '/',
         'process.env.NODE_ENV': "'production'",
       }),
       resolve({}),

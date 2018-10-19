@@ -1,7 +1,7 @@
 // @ts-ignore
-import router from 'workbox-routing';
+import router, { NavigationRoute } from 'workbox-routing';
 // @ts-ignore
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { NetworkFirst } from 'workbox-strategies';
 // @ts-ignore
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
 
@@ -12,17 +12,17 @@ type PublisherCachingOptions = {
 
 class AmpCachablePlugin {
   cacheWillUpdate({ response }: { response: Response }): Response | null {
-    const responseContentType = response.headers.get('content-type');
-    if (responseContentType && responseContentType.includes('text/html')) {
-      //const responseText = await response.text();
-      // if (responseText) has 'amphtml'
+    // const responseContentType = response.headers.get('content-type');
+    // if (responseContentType && responseContentType.includes('text/html')) {
+    //   //const responseText = await response.text();
+    //   // if (responseText) has 'amphtml'
 
-      return null;
-    } else {
-      // Non HTML responses will be allowed to be cached
-      return response;
-    }
-    return null;
+    //   return null;
+    // } else {
+    //   // Non HTML responses will be allowed to be cached
+    //   return response;
+    // }
+    return response;
   }
 }
 
@@ -30,13 +30,12 @@ export function publisherCaching(
   publisherOptions: PublisherCachingOptions,
 ): void {
   enableNagigationPreload();
-  publisherOptions.allowList.forEach(allowURL => {
-    router.registerRoute(
-      allowURL,
-      new CacheFirst({
+  router.registerRoute(
+    new NavigationRoute(
+      new NetworkFirst({
         cacheName: 'AMP-PUBLISHER-CACHE',
         plugins: [new AmpCachablePlugin()],
       }),
-    );
-  });
+    ),
+  );
 }
