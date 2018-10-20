@@ -8,6 +8,6 @@ const writeFile = promisify(fs.writeFile);
 
 (async function(){
   const serviceWorker = await buildSW({});
-  await writeFile(path.join(__dirname, 'sw.js'), serviceWorker);
+  await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
   serve(__dirname);
 })();

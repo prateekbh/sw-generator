@@ -60,23 +60,65 @@ describe('AMP Caching Module', function() {
       it('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it('should not fetch versioned js anymore from network', async () => {
-        const DUMMY_RESPONSE = 'dummy response';
-        const fetchResponse = await driver.executeAsyncScript(
-          async (cacheName, scriptURL, DUMMY_RESPONSE, cb) => {
-            const cache = await caches.open(cacheName);
-            await cache.put(
-              new Request(scriptURL),
-              new Response(DUMMY_RESPONSE),
+      it('should not fetch versioned js anymore from network', () =>
+        checkForCachedResponse(cacheName, scriptURL, driver));
+
+      it('should not expire cached Response after 13 days', async () => {
+        await checkForCachedResponse(cacheName, scriptURL, driver);
+        const responseCaches = await driver.executeAsyncScript(
+          async (cacheName, scriptURL, cb) => {
+            // Make the script timestamp in indexedDB as 15 days back.
+            const store = getKeyValStore(cacheName);
+            const storeObject = await store.get(scriptURL);
+            const timestamp = storeObject.timestamp;
+            const newTimestamp = timestamp - 13 * 24 * 60 * 60 * 1000; // 15 days back;
+            storeObject.timestamp = newTimestamp;
+            await store.put(storeObject);
+            const cacheData = await (await caches.open(cacheName)).match(
+              scriptURL,
             );
-            const response = await fetch(scriptURL);
-            cb(await response.text());
+            // This call will asynchronously delete the cache.
+            await fetch(scriptURL);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const postFetchCacheData = await (await caches.open(
+              cacheName,
+            )).match(scriptURL);
+            cb({ cacheData, postFetchCacheData });
           },
           cacheName,
           scriptURL,
-          DUMMY_RESPONSE,
         );
-        expect(fetchResponse).to.be.equal(DUMMY_RESPONSE);
+        expect(responseCaches.postFetchCacheData).to.not.be.undefined;
+        expect(responseCaches.cacheData).to.not.be.undefined;
+      });
+
+      it('should expire cached Response after 15 days', async () => {
+        await checkForCachedResponse(cacheName, scriptURL, driver);
+        const responseCaches = await driver.executeAsyncScript(
+          async (cacheName, scriptURL, cb) => {
+            // Make the script timestamp in indexedDB as 15 days back.
+            const store = getKeyValStore(cacheName);
+            const storeObject = await store.get(scriptURL);
+            const timestamp = storeObject.timestamp;
+            const newTimestamp = timestamp - 15 * 24 * 60 * 60 * 1000; // 15 days back;
+            storeObject.timestamp = newTimestamp;
+            await store.put(storeObject);
+            const cacheData = await (await caches.open(cacheName)).match(
+              scriptURL,
+            );
+            // This call will asynchronously delete the cache.
+            await fetch(scriptURL);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const postFetchCacheData = await (await caches.open(
+              cacheName,
+            )).match(scriptURL);
+            cb({ cacheData, postFetchCacheData });
+          },
+          cacheName,
+          scriptURL,
+        );
+        expect(responseCaches.postFetchCacheData).to.be.undefined;
+        expect(responseCaches.cacheData).to.not.be.undefined;
       });
     });
   });
@@ -93,6 +135,64 @@ describe('AMP Caching Module', function() {
 
       it('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
+
+      it('should not expire cached Response after half day', async () => {
+        await checkForCachedResponse(cacheName, scriptURL, driver);
+        const responseCaches = await driver.executeAsyncScript(
+          async (cacheName, scriptURL, cb) => {
+            // Make the script timestamp in indexedDB as 12 hours back.
+            const unversionedStore = getKeyValStore(cacheName);
+            const storeObject = await unversionedStore.get(scriptURL);
+            const timestamp = storeObject.timestamp;
+            const newTimestamp = timestamp - 12 * 60 * 60 * 1000; // half day;
+            storeObject.timestamp = newTimestamp;
+            await unversionedStore.put(storeObject);
+            const cacheData = await (await caches.open(cacheName)).match(
+              scriptURL,
+            );
+            // This call will asynchronously delete the cache.
+            await fetch(scriptURL);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const postFetchCacheData = await (await caches.open(
+              cacheName,
+            )).match(scriptURL);
+            cb({ cacheData, postFetchCacheData });
+          },
+          cacheName,
+          scriptURL,
+        );
+        expect(responseCaches.postFetchCacheData).to.not.be.undefined;
+        expect(responseCaches.cacheData).to.not.be.undefined;
+      });
+
+      it('should expire cached Response after 2 days', async () => {
+        await checkForCachedResponse(cacheName, scriptURL, driver);
+        const responseCaches = await driver.executeAsyncScript(
+          async (cacheName, scriptURL, cb) => {
+            // Make the script timestamp in indexedDB as 2 days back.
+            const unversionedStore = getKeyValStore(cacheName);
+            const storeObject = await unversionedStore.get(scriptURL);
+            const timestamp = storeObject.timestamp;
+            const newTimestamp = timestamp - 2 * 24 * 60 * 60 * 1000; // 2 days back;
+            storeObject.timestamp = newTimestamp;
+            await unversionedStore.put(storeObject);
+            const cacheData = await (await caches.open(cacheName)).match(
+              scriptURL,
+            );
+            // This call will asynchronously delete the cache.
+            await fetch(scriptURL);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const postFetchCacheData = await (await caches.open(
+              cacheName,
+            )).match(scriptURL);
+            cb({ cacheData, postFetchCacheData });
+          },
+          cacheName,
+          scriptURL,
+        );
+        expect(responseCaches.postFetchCacheData).to.be.undefined;
+        expect(responseCaches.cacheData).to.not.be.undefined;
+      });
 
       it('should refresh the cache from network everytime', async () => {
         const DUMMY_RESPONSE = 'dummy response';
@@ -183,4 +283,20 @@ async function checkScriptExistanceInCache(cacheName, driver, scriptURL) {
     scriptURL,
   );
   expect(cacheResponse).to.be.equal(true);
+}
+
+async function checkForCachedResponse(cacheName, scriptURL, driver) {
+  const DUMMY_RESPONSE = 'dummy response';
+  const fetchResponse = await driver.executeAsyncScript(
+    async (cacheName, scriptURL, DUMMY_RESPONSE, cb) => {
+      const cache = await caches.open(cacheName);
+      await cache.put(new Request(scriptURL), new Response(DUMMY_RESPONSE));
+      const response = await fetch(scriptURL);
+      cb(await response.text());
+    },
+    cacheName,
+    scriptURL,
+    DUMMY_RESPONSE,
+  );
+  expect(fetchResponse).to.be.equal(DUMMY_RESPONSE);
 }
