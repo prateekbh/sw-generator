@@ -64,35 +64,34 @@ describe('AMP Caching Module', function() {
         checkForCachedResponse(cacheName, scriptURL, driver));
 
       it('should not expire cached Response after 13 days', async () => {
-        const responseCaches = await getPrePostCacheData(
+        const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
           driver,
           13 * 24 * 60 * 60 * 1000,
         );
-        expect(responseCaches.postFetchCacheData).to.not.be.undefined;
-        expect(responseCaches.cacheData).to.not.be.undefined;
+        expect(responseText).to.be.equal('dummy response');
       });
 
       it('should expire cached Response after 15 days', async () => {
-        const responseCaches = await getPrePostCacheData(
+        const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
           driver,
           15 * 24 * 60 * 60 * 1000,
         );
-        expect(responseCaches.postFetchCacheData).to.be.undefined;
-        expect(responseCaches.cacheData).to.not.be.undefined;
+        expect(responseText).to.not.be.equal('dummy response');
       });
     });
   });
 
   describe('Unversioned JS', () => {
     const ampRuntime = 'https://cdn.ampproject.org/v0.js';
-    const ampExtension = 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
+    const ampMustacheExtension =
+      'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
     const cacheName = 'AMP-UNVERSIONED-CACHE';
 
-    const filesToTest = [ampRuntime, ampExtension];
+    const filesToTest = [ampRuntime, ampMustacheExtension];
     filesToTest.forEach(scriptURL => {
       it('should create a cache in cache name, once fetched', async () =>
         checkCacheCreation(cacheName, driver, scriptURL));
@@ -100,26 +99,24 @@ describe('AMP Caching Module', function() {
       it('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it('should not expire cached Response after half days', async () => {
-        const responseCaches = await getPrePostCacheData(
+      it('should not expire cached Response after an hour', async () => {
+        const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
           driver,
-          12 * 60 * 60 * 1000,
+          60 * 60 * 1000,
         );
-        expect(responseCaches.postFetchCacheData).to.not.be.undefined;
-        expect(responseCaches.cacheData).to.not.be.undefined;
+        expect(responseText).to.be.equal('dummy response');
       });
 
       it('should expire cached Response after 2 days', async () => {
-        const responseCaches = await getPrePostCacheData(
+        const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
           driver,
-          3 * 24 * 60 * 60 * 1000,
+          2 * 24 * 60 * 60 * 1000,
         );
-        expect(responseCaches.postFetchCacheData).to.be.undefined;
-        expect(responseCaches.cacheData).to.not.be.undefined;
+        expect(responseText).to.not.be.equal('dummy response');
       });
 
       it('should refresh the cache from network everytime', async () => {
@@ -233,21 +230,19 @@ async function getPrePostCacheData(cacheName, scriptURL, driver, timeDelta) {
   await checkForCachedResponse(cacheName, scriptURL, driver);
   return await driver.executeAsyncScript(
     async (cacheName, scriptURL, timeDelta, cb) => {
-      // Make the script timestamp in indexedDB as 15 days back.
-      const store = getKeyValStore(cacheName);
-      const storeObject = await store.get(scriptURL);
-      const timestamp = storeObject.timestamp;
-      const newTimestamp = timestamp - timeDelta; // 15 days back;
-      storeObject.timestamp = newTimestamp;
-      await store.put(storeObject);
-      const cacheData = await (await caches.open(cacheName)).match(scriptURL);
-      // This call will asynchronously delete the cache.
-      await fetch(scriptURL);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const postFetchCacheData = await (await caches.open(cacheName)).match(
-        scriptURL,
+      const DUMMY_RESPONSE = 'dummy response';
+      const cache = await caches.open(cacheName);
+      await cache.put(
+        new Request(scriptURL),
+        new Response(DUMMY_RESPONSE, {
+          headers: {
+            date: new Date(Date.now() - timeDelta),
+          },
+        }),
       );
-      cb({ cacheData, postFetchCacheData });
+      const response = await fetch(scriptURL);
+      const responseText = await response.text();
+      cb(responseText);
     },
     cacheName,
     scriptURL,

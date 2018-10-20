@@ -7,7 +7,7 @@ import { Plugin } from 'workbox-cache-expiration';
 
 export function ampAssetsCaching() {
   const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
-  const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/;
+  const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/v0.js/;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
 
   const unversionedCacheName = 'AMP-UNVERSIONED-CACHE';
