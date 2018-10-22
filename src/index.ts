@@ -4,10 +4,12 @@ import {
   DocumentCachingOptions,
 } from './modules/document-caching/index';
 
+const __REPLACE_CONFIG_documentCachingOptions: DocumentCachingOptions = {};
+
 const config: {
   documentCachingOptions: DocumentCachingOptions;
 } = {
-  documentCachingOptions: {},
+  documentCachingOptions: __REPLACE_CONFIG_documentCachingOptions,
 };
 
 ampAssetsCaching();

@@ -1,7 +1,7 @@
 import npmRun from 'npm-run';
 import { join } from 'path';
 import { rollup } from 'rollup';
-import replace from 'rollup-plugin-replace';
+import replace from 'rollup-plugin-re';
 import resolve from 'rollup-plugin-node-resolve';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
@@ -16,8 +16,16 @@ export async function buildSW() {
     input: join('output', 'index.js'),
     plugins: [
       replace({
-        homeURL: '/',
-        'process.env.NODE_ENV': "'production'",
+        patterns: [
+          {
+            test: '__REPLACE_CONFIG_documentCachingOptions = {}',
+            replace: '__REPLACE_CONFIG_documentCachingOptions = blah',
+          },
+          {
+            test: 'process.env.NODE_ENV',
+            replace: "'production'",
+          },
+        ],
       }),
       resolve({}),
       /* TODO: uncomment this after https://github.com/ampproject/rollup-plugin-closure-compiler/issues/92
