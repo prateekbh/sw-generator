@@ -6,7 +6,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
 import { argv } from 'yargs';
 
-export async function buildSW({ documentCachingOptions }) {
+export async function buildSW({ documentCachingOptions } = {}) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
