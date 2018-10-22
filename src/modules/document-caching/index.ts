@@ -11,7 +11,7 @@ export type DocumentCachingOptions = {
   timeoutSeconds?: Number;
 };
 
-class AmpCachablePlugin {
+class AmpDocumentCachablePlugin {
   async cacheWillUpdate({
     response,
   }: {
@@ -21,7 +21,11 @@ class AmpCachablePlugin {
     const responseContentType = clonedResponse.headers.get('content-type');
     if (responseContentType && responseContentType.includes('text/html')) {
       try {
-        const responseText = (await clonedResponse.text()).substring(0, 100);
+        const responseBody = await clonedResponse.text();
+        const responseText = responseBody.substring(
+          0,
+          responseBody.indexOf('<html') + 100,
+        );
         if (/<html (⚡|amphtml)/.test(responseText)) {
           return response;
         }
@@ -55,7 +59,7 @@ export function documentCaching(
     new NavigationRoute(
       new NetworkFirst({
         cacheName: 'AMP-PUBLISHER-CACHE',
-        plugins: [new AmpCachablePlugin()],
+        plugins: [new AmpDocumentCachablePlugin()],
         networkTimeoutSeconds: documentCachingOptions.timeoutSeconds || 2,
       }),
       navigationPreloadOptions,
