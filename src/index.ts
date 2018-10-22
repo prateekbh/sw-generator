@@ -1,8 +1,17 @@
 import { ampAssetsCaching } from './modules/amp-caching/index';
-import { documentCaching } from './modules/document-caching/index';
+import {
+  documentCaching,
+  DocumentCachingOptions,
+} from './modules/document-caching/index';
+
+const config: {
+  documentCachingOptions: DocumentCachingOptions;
+} = {
+  documentCachingOptions: {},
+};
 
 ampAssetsCaching();
-documentCaching({});
+documentCaching(config.documentCachingOptions);
 
 self.addEventListener('install', function(e) {
   // @ts-ignore
