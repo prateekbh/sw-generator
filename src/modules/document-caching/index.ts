@@ -20,13 +20,12 @@ class AmpDocumentCachablePlugin {
   }): Promise<Response | null> {
     const clonedResponse = response.clone();
     const responseContentType = clonedResponse.headers.get('content-type');
+    // TODO: implement header check as well as it'll be less work.
     if (responseContentType && responseContentType.includes('text/html')) {
       try {
         const responseBody = await clonedResponse.text();
-        const responseText = responseBody.substring(
-          0,
-          responseBody.indexOf('<html') + 100,
-        );
+        // do go looking for amphtml attr in the entire doc
+        const responseText = responseBody.substring(0, 500);
         if (/<html (⚡|amphtml)/.test(responseText)) {
           return response;
         }
