@@ -4,6 +4,7 @@ import { rollup } from 'rollup';
 import replace from 'rollup-plugin-re';
 import resolve from 'rollup-plugin-node-resolve';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
+import { argv } from 'yargs';
 
 export async function buildSW({ documentCachingOptions }) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
@@ -19,10 +20,22 @@ export async function buildSW({ documentCachingOptions }) {
   ];
 
   if (documentCachingOptions) {
+    const tempDocCachingOptions = {};
+    if (documentCachingOptions.allowList) {
+      tempDocCachingOptions.allowList = [];
+      documentCachingOptions.allowList.forEach(regexp => {
+        tempDocCachingOptions.allowList.push(regexp.toString());
+      });
+    } else if (documentCachingOptions.denyList) {
+      tempDocCachingOptions.denyList = [];
+      documentCachingOptions.denyList.forEach(regexp => {
+        tempDocCachingOptions.denyList.push(regexp.toString());
+      });
+    }
     replacePatterns.push({
       test: '__REPLACE_CONFIG_documentCachingOptions = {}',
       replace: `__REPLACE_CONFIG_documentCachingOptions = ${JSON.stringify(
-        documentCachingOptions,
+        tempDocCachingOptions,
       )}`,
     });
   }
