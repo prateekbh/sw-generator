@@ -48,10 +48,15 @@ function runMochaForBrowser(driver, server) {
   };
   global.expect = expect;
   const mocha = new Mocha();
-  mocha.addFile(join(__dirname, 'amp-caching', 'amp-caching-test.js'));
-  mocha.addFile(
-    join(__dirname, 'document-caching', 'document-caching-test.js'),
-  );
+  if (argv['testFile']) {
+    console.log(argv['testFile']);
+    mocha.addFile(join(__dirname, argv['testFile']));
+  } else {
+    mocha.addFile(join(__dirname, 'amp-caching', 'amp-caching-test.js'));
+    mocha.addFile(
+      join(__dirname, 'document-caching', 'document-caching-test.js'),
+    );
+  }
   // Run the tests.
   mocha
     .run(function(failures) {
