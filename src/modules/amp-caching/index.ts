@@ -2,28 +2,53 @@
 import router from 'workbox-routing';
 // @ts-ignore
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+// @ts-ignore
+import { Plugin } from 'workbox-cache-expiration';
 
 export function ampAssetsCaching() {
-  const CACHE_OPTIONS = {
-    cacheName: 'AMP-SW-CACHE',
-  };
-
   const versionedAssetsRE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
-  const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/\w*(\-\w*)?.js/;
+  const unversionedRuntimeRE = /^https:\/\/cdn.ampproject.org\/v0.js/;
   const unversionedExtensionsRE = /^https:\/\/cdn.ampproject.org\/v0\//;
 
+  const unversionedCacheName = 'AMP-UNVERSIONED-CACHE';
+  const versionedCacheName = 'AMP-VERSIONED-CACHE';
+
   // Versioned Assets
-  router.registerRoute(versionedAssetsRE, new CacheFirst(CACHE_OPTIONS));
+  router.registerRoute(
+    versionedAssetsRE,
+    new CacheFirst({
+      cacheName: versionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 14 * 24 * 60 * 60, // 14 days
+        }),
+      ],
+    }),
+  );
 
   // Unversioned runtimes
   router.registerRoute(
     unversionedRuntimeRE,
-    new StaleWhileRevalidate(CACHE_OPTIONS),
+    new StaleWhileRevalidate({
+      cacheName: unversionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        }),
+      ],
+    }),
   );
 
   // Unversioned Extensions
   router.registerRoute(
     unversionedExtensionsRE,
-    new StaleWhileRevalidate(CACHE_OPTIONS),
+    new StaleWhileRevalidate({
+      cacheName: unversionedCacheName,
+      plugins: [
+        new Plugin({
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        }),
+      ],
+    }),
   );
 }

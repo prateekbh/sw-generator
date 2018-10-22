@@ -6,7 +6,7 @@ import { NetworkFirst } from 'workbox-strategies';
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
 
 type PublisherCachingOptions = {
-  allowList: Array<RegExp>;
+  allowList?: Array<RegExp>;
   denyList?: Array<RegExp>;
 };
 
@@ -26,8 +26,8 @@ class AmpCachablePlugin {
   }
 }
 
-export function publisherCaching(
-  publisherOptions: PublisherCachingOptions,
+export function documentCaching(
+  documentCachingOptions: PublisherCachingOptions,
 ): void {
   enableNagigationPreload();
   router.registerRoute(

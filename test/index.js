@@ -3,8 +3,9 @@ import serve from 'serve';
 import { join } from 'path';
 import Mocha from 'mocha';
 import { expect } from 'chai';
+import { argv } from 'yargs';
 
-const isLocalExecution = process.argv.includes('--local');
+const isLocalExecution = !!argv['local'];
 
 (async () => {
   const expiration = 24;

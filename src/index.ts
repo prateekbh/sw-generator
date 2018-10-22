@@ -1,13 +1,15 @@
 import { ampAssetsCaching } from './modules/amp-caching/index';
-import { publisherCaching } from './modules/publisher-caching/index';
+import { documentCaching } from './modules/document-caching/index';
+
 ampAssetsCaching();
-publisherCaching({
-  allowList: [/\//],
-});
+documentCaching({});
 
 self.addEventListener('install', function(e) {
   // @ts-ignore
   e.waitUntil(self.skipWaiting());
 });
 
-ampAssetsCaching();
+self.addEventListener('activate', function(e) {
+  // @ts-ignore
+  e.waitUntil(self.clients.claim());
+});

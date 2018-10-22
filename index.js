@@ -20,10 +20,13 @@ export async function buildSW() {
         'process.env.NODE_ENV': "'production'",
       }),
       resolve({}),
-      compiler({
-        compilation_level: 'ADVANCED',
-        jscomp_off: 'checkVars',
-      }),
+      /* TODO: uncomment this after https://github.com/ampproject/rollup-plugin-closure-compiler/issues/92
+      * is resolved
+      */
+      // compiler({
+      //   compilation_level: 'ADVANCED',
+      //   jscomp_off: 'checkVars',
+      // }),
     ],
   });
   const { code } = await bundle.generate({
