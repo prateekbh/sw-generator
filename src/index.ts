@@ -1,4 +1,7 @@
-import { ampAssetsCaching } from './modules/amp-caching/index';
+import {
+  ampAssetsCaching,
+  listenForFetchedScripts,
+} from './modules/amp-caching/index';
 import {
   documentCaching,
   DocumentCachingOptions,
@@ -13,14 +16,21 @@ const config: {
 };
 
 ampAssetsCaching();
+listenForFetchedScripts();
 documentCaching(config.documentCachingOptions);
 
-self.addEventListener('install', function(e) {
-  // @ts-ignore
-  e.waitUntil(self.skipWaiting());
+self.addEventListener('install', function(e: ExtendableEvent) {
+  const { skipWaiting } = self as ServiceWorkerGlobalScope;
+  e.waitUntil(skipWaiting());
 });
 
-self.addEventListener('activate', function(e) {
-  // @ts-ignore
-  e.waitUntil(self.clients.claim());
+self.addEventListener('activate', async (e: ExtendableEvent) => {
+  const { clients } = self as ServiceWorkerGlobalScope;
+  e.waitUntil(clients.claim());
+  const windowClients = await clients.matchAll({ type: 'window' });
+  windowClients.forEach((client: Client) => {
+    if (client && client.url) {
+      console.log(client.url);
+    }
+  });
 });
