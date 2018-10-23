@@ -4,6 +4,7 @@ import {
 } from './modules/amp-caching/index';
 import {
   documentCaching,
+  cacheAMPDocument,
   DocumentCachingOptions,
 } from './modules/document-caching/index';
 
@@ -30,7 +31,7 @@ self.addEventListener('activate', async (e: ExtendableEvent) => {
   const windowClients = await clients.matchAll({ type: 'window' });
   windowClients.forEach((client: Client) => {
     if (client && client.url) {
-      console.log(client.url);
+      cacheAMPDocument(client.url);
     }
   });
 });

@@ -12,6 +12,8 @@ export type DocumentCachingOptions = {
   timeoutSeconds?: Number;
 };
 
+const cacheName = 'AMP-PUBLISHER-CACHE';
+
 class AmpDocumentCachablePlugin {
   async cacheWillUpdate({
     response,
@@ -24,9 +26,7 @@ class AmpDocumentCachablePlugin {
     if (responseContentType && responseContentType.includes('text/html')) {
       try {
         const responseBody = await clonedResponse.text();
-        // do go looking for amphtml attr in the entire doc
-        const responseText = responseBody.substring(0, 500);
-        if (/<html (⚡|amphtml)/.test(responseText)) {
+        if (/<html (⚡|amphtml)/.test(responseBody)) {
           return response;
         }
       } catch (e) {
@@ -62,11 +62,24 @@ export function documentCaching(
   router.registerRoute(
     new NavigationRoute(
       new NetworkFirst({
-        cacheName: 'AMP-PUBLISHER-CACHE',
+        cacheName,
         plugins: [new AmpDocumentCachablePlugin()],
         networkTimeoutSeconds: documentCachingOptions.timeoutSeconds || 2,
       }),
       navigationPreloadOptions,
     ),
   );
+}
+
+export async function cacheAMPDocument(url: string) {
+  const request = new Request(url, { mode: 'same-origin' });
+  const response = await fetch(request);
+  const ampCachablePlugin = new AmpDocumentCachablePlugin();
+  const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
+    response,
+  });
+  const cache = await caches.open(cacheName);
+  if (responseToBeCached) {
+    cache.put(request, responseToBeCached);
+  }
 }

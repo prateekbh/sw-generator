@@ -54,13 +54,29 @@ export function ampAssetsCaching() {
 }
 
 export function listenForFetchedScripts(): void {
-  self.addEventListener('message', (event: MessageEvent) => {
-    const unversionedCache = await caches.open(UNVERSIONED_CACHE_NAME);
-    const versionedCache = await caches.open(VERSIONED_CACHE_NAME);
-    const data: FluxStandardAction<[string]> = JSON.parse(event.data);
-    data.payload &&
-      data.payload.forEach(script => {
-        script;
-      });
+  self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
+    const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
+    if (data.payload) {
+      messageEvent.waitUntil(cachePreRequestedScripts(data.payload));
+    }
   });
+}
+
+async function cachePreRequestedScripts(scripts: Array<string>) {
+  const unversionedScripts: Array<Request> = [];
+  const versionedScripts: Array<Request> = [];
+  scripts.forEach(script => {
+    if (
+      UNVERSIONED_EXTENSIONS_RE.test(script) ||
+      UNVERSIONED_RUNTIME_RE.test(script)
+    ) {
+      unversionedScripts.push(new Request(script));
+    } else if (VERSIONED_ASSETS_RE.test(script)) {
+      versionedScripts.push(new Request(script));
+    }
+  });
+  const unversionedCache = await caches.open(UNVERSIONED_CACHE_NAME);
+  unversionedCache.addAll(unversionedScripts);
+  const versionedCache = await caches.open(VERSIONED_CACHE_NAME);
+  versionedCache.addAll(versionedScripts);
 }
