@@ -18,7 +18,7 @@ describe('AMP Caching Module', function() {
   });
 
   after(async () => {
-    //await unlink(serviceWorkerPath);
+    await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
@@ -166,6 +166,7 @@ describe('AMP Caching Module', function() {
   });
 
   it('should cache AMP scripts given by postMessage', async () => {
+    await driver.get('http://localhost:6881/test/index.html');
     const cacheName = 'AMP-VERSIONED-CACHE';
     const payload = [
       'https://cdn.ampproject.org/rtv/001525381599226/v0.js',
@@ -183,17 +184,21 @@ describe('AMP Caching Module', function() {
     // A request to a versioned js file should create the cache
     hasVersionJSInCache = await driver.executeAsyncScript(
       async (cacheName, payload, cb) => {
-        navigator.serviceWorker.controller.postMessage(
-          JSON.stringify({
-            type: 'FIRST-VISIT-CACHING',
-            payload,
-          }),
-        );
+        try {
+          navigator.serviceWorker.controller.postMessage(
+            JSON.stringify({
+              type: 'FIRST-VISIT-CACHING',
+              payload,
+            }),
+          );
+        } catch (e) {
+          cb(e.message);
+        }
         // TODO: find a better solution to this.
         // Allow script to be put in cache
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const cache = await caches.open(cacheName);
-        cb((await cache.keys()).map(request => request.url));
+        // await new Promise(resolve => setTimeout(resolve, 500));
+        // const cache = await caches.open(cacheName);
+        // cb((await cache.keys()).map(request => request.url));
       },
       cacheName,
       payload,
