@@ -164,6 +164,42 @@ describe('AMP Caching Module', function() {
       });
     });
   });
+
+  it('should cache AMP scripts given by postMessage', async () => {
+    const cacheName = 'AMP-VERSIONED-CACHE';
+    const payload = [
+      'https://cdn.ampproject.org/rtv/001525381599226/v0.js',
+      'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js',
+      'https://code.jquery.com/jquery-3.3.1.min.js',
+    ];
+    let hasVersionJSInCache = await driver.executeAsyncScript(
+      async (cacheName, cb) => {
+        cb(await caches.has(cacheName));
+      },
+      cacheName,
+    );
+    // There shouldn't be any cache in the beginning
+    expect(hasVersionJSInCache).to.be.equal(false);
+    // A request to a versioned js file should create the cache
+    hasVersionJSInCache = await driver.executeAsyncScript(
+      async (cacheName, payload, cb) => {
+        navigator.serviceWorker.controller.postMessage(
+          JSON.stringify({
+            type: 'FIRST-VISIT-CACHING',
+            payload,
+          }),
+        );
+        // TODO: find a better solution to this.
+        // Allow script to be put in cache
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const cache = await caches.open(cacheName);
+        cb((await cache.keys()).map(request => request.url));
+      },
+      cacheName,
+      payload,
+    );
+    expect(hasVersionJSInCache).to.deep.equal(payload.slice(0, 2));
+  });
 });
 
 async function checkCacheCreation(cacheName, driver, scriptURL) {

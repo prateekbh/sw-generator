@@ -56,7 +56,7 @@ export function ampAssetsCaching() {
 export function listenForFetchedScripts(): void {
   self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
     const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
-    if (data.payload) {
+    if (data.type === 'FIRST-VISIT-CACHING' && data.payload) {
       messageEvent.waitUntil(cachePreRequestedScripts(data.payload));
     }
   });
