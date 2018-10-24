@@ -27,11 +27,10 @@ self.addEventListener('install', function(e: ExtendableEvent) {
 
 self.addEventListener('activate', async (e: ExtendableEvent) => {
   const { clients } = self as ServiceWorkerGlobalScope;
-  e.waitUntil(clients.claim());
-  const windowClients = await clients.matchAll({ type: 'window' });
-  windowClients.forEach((client: Client) => {
-    if (client && client.url) {
-      cacheAMPDocument(client.url);
-    }
-  });
+  e.waitUntil(
+    clients.claim().then(async () => {
+      const windowClients = await clients.matchAll({ type: 'window' });
+      return Promise.all(cacheAMPDocument(windowClients));
+    }),
+  );
 });

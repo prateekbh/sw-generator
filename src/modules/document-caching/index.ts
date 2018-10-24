@@ -75,15 +75,19 @@ export function documentCaching(
 /**
  * Given a URL, this checks if its an AMP URL and caches it.
  */
-export async function cacheAMPDocument(url: string) {
-  const request = new Request(url, { mode: 'same-origin' });
-  const response = await fetch(request);
-  const ampCachablePlugin = new AmpDocumentCachablePlugin();
-  const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
-    response,
+export function cacheAMPDocument(clients: ReadonlyArray<Client>) {
+  return clients.map(async (client: Client) => {
+    if (client && client.url) {
+      const request = new Request(client.url, { mode: 'same-origin' });
+      const response = await fetch(request);
+      const ampCachablePlugin = new AmpDocumentCachablePlugin();
+      const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
+        response,
+      });
+      const cache = await caches.open(cacheName);
+      if (responseToBeCached) {
+        cache.put(request, responseToBeCached);
+      }
+    }
   });
-  const cache = await caches.open(cacheName);
-  if (responseToBeCached) {
-    cache.put(request, responseToBeCached);
-  }
 }
