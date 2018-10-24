@@ -6,6 +6,8 @@ import { expect } from 'chai';
 import { argv } from 'yargs';
 
 const isLocalExecution = !!argv['local'];
+let server;
+const serveDir = join(__dirname, '../');
 
 (async () => {
   const expiration = 24;
@@ -18,11 +20,21 @@ const isLocalExecution = !!argv['local'];
     );
   }
 
-  console.log('starting server...');
-  const serveDir = join(__dirname, '../');
-  const server = serve(serveDir, {
-    port: 6881,
-  });
+  global.__AMPSW = {
+    server: {
+      stop: () => {
+        server.stop();
+      },
+      start: () => {
+        console.log('starting server...');
+        server = serve(serveDir, {
+          port: 6881,
+        });
+      },
+    },
+  };
+
+  global.__AMPSW.server.start();
 
   const browsers = seleniumAssistant.getLocalBrowsers();
   browsers.forEach(async browser => {
@@ -42,13 +54,19 @@ const isLocalExecution = !!argv['local'];
   });
 })();
 
-function runMochaForBrowser(driver, server) {
-  global.__AMPSW = {
-    driver,
-  };
+function runMochaForBrowser(driver) {
+  global.__AMPSW.driver = driver;
   global.expect = expect;
   const mocha = new Mocha();
-  mocha.addFile(join(__dirname, 'amp-caching', 'amp-caching-test.js'));
+  if (argv['testFile']) {
+    console.log(argv['testFile']);
+    mocha.addFile(join(__dirname, argv['testFile']));
+  } else {
+    mocha.addFile(join(__dirname, 'amp-caching', 'amp-caching-test.js'));
+    mocha.addFile(
+      join(__dirname, 'document-caching', 'document-caching-test.js'),
+    );
+  }
   // Run the tests.
   mocha
     .run(function(failures) {
@@ -56,6 +74,6 @@ function runMochaForBrowser(driver, server) {
     })
     .on('end', function() {
       seleniumAssistant.killWebDriver(driver);
-      server.stop();
+      global.__AMPSW.server.stop();
     });
 }

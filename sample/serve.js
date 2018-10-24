@@ -7,7 +7,11 @@ import {promisify} from 'util';
 const writeFile = promisify(fs.writeFile);
 
 (async function(){
-  const serviceWorker = await buildSW({});
+  const serviceWorker = await buildSW({
+    documentCachingOptions: {
+      denyList: [/menu.amp.html/],
+    }
+  });
   await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
   serve(__dirname);
 })();
