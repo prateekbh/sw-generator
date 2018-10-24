@@ -78,15 +78,19 @@ export function documentCaching(
 export function cacheAMPDocument(clients: ReadonlyArray<Client>) {
   return clients.map(async (client: Client) => {
     if (client && client.url) {
-      const request = new Request(client.url, { mode: 'same-origin' });
-      const response = await fetch(request);
-      const ampCachablePlugin = new AmpDocumentCachablePlugin();
-      const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
-        response,
-      });
-      const cache = await caches.open(cacheName);
-      if (responseToBeCached) {
-        cache.put(request, responseToBeCached);
+      try {
+        const request = new Request(client.url, { mode: 'same-origin' });
+        const response = await fetch(request);
+        const ampCachablePlugin = new AmpDocumentCachablePlugin();
+        const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
+          response,
+        });
+        const cache = await caches.open(cacheName);
+        if (responseToBeCached) {
+          cache.put(request, responseToBeCached);
+        }
+      } catch (e) {
+        // noop cuz we dont want to stop SW activation
       }
     }
   });
