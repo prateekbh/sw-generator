@@ -95,7 +95,7 @@ describe('Document Caching Module', function() {
     await performCleanupAndWaitForSWActivation(driver);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     // doing round trip because the service worker is lazy
-    await driver.get('http://localhost:6881/test/index.amp.html');
+    await driver.get('http://localhost:6881/test/index.html');
     let cachedData = await driver.executeAsyncScript(async (cacheName, cb) => {
       const cache = await caches.open(cacheName);
       cb(
@@ -113,7 +113,7 @@ describe('Document Caching Module', function() {
     }, cacheName);
     expect(cachedData).to.be.null;
   });
-  it.skip('should respond from cache if server does not respond', async () => {
+  it('should respond from cache if server does not respond', async () => {
     this.timeout(8000);
     const generatedSW = await buildSW();
     await writeFile(serviceWorkerPath, generatedSW);
@@ -127,7 +127,7 @@ describe('Document Caching Module', function() {
       cb(document.querySelector('amp-img'));
     });
     expect(element).to.not.be.null;
-    global.__AMPSW.server.start();
+    await global.__AMPSW.server.start();
   });
   // TODO: figure out how to test navigation preloading
 

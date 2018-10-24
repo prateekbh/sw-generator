@@ -1,13 +1,24 @@
 import seleniumAssistant from 'selenium-assistant';
-import serve from 'serve';
 import { join } from 'path';
 import Mocha from 'mocha';
 import { expect } from 'chai';
 import { argv } from 'yargs';
+import http from 'http';
+import nodeStatic from 'node-static';
 
 const isLocalExecution = !!argv['local'];
-let server;
-const serveDir = join(__dirname, '../');
+const serveDir = new nodeStatic.Server('./');
+
+const server = http.createServer((request, response) => {
+  request
+    .addListener('end', function() {
+      //
+      // Serve files!
+      //
+      serveDir.serve(request, response);
+    })
+    .resume();
+});
 
 (async () => {
   const expiration = 24;
@@ -23,12 +34,14 @@ const serveDir = join(__dirname, '../');
   global.__AMPSW = {
     server: {
       stop: () => {
-        server.stop();
+        server.close();
       },
       start: () => {
-        console.log('starting server...');
-        server = serve(serveDir, {
-          port: 6881,
+        return new Promise(resolve => {
+          server.listen(6881, () => {
+            console.log('Running at http://localhost:6881');
+            resolve();
+          });
         });
       },
     },
@@ -50,7 +63,7 @@ const serveDir = join(__dirname, '../');
     console.log(`testing on ${browser.getPrettyName()}`);
     const driver = await browser.getSeleniumDriver();
     await driver.get('http://localhost:6881/test/index.html');
-    runMochaForBrowser(driver, server);
+    runMochaForBrowser(driver);
   });
 })();
 
@@ -74,6 +87,6 @@ function runMochaForBrowser(driver) {
     })
     .on('end', function() {
       seleniumAssistant.killWebDriver(driver);
-      //global.__AMPSW.server.stop();
+      global.__AMPSW.server.stop();
     });
 }

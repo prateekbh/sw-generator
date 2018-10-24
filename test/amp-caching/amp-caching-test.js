@@ -18,7 +18,7 @@ describe('AMP Caching Module', function() {
   });
 
   after(async () => {
-    await unlink(serviceWorkerPath);
+    //await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
@@ -46,9 +46,9 @@ describe('AMP Caching Module', function() {
   });
 
   describe('Versioned JS', () => {
-    const ampRuntime = 'https://cdn.ampproject.org/rtv/001525381599226/v0.js';
+    const ampRuntime = 'https://cdn.ampproject.org/rtv/011810152207300/v0.js';
     const ampExtension =
-      'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js';
+      'https://cdn.ampproject.org/rtv/011810152207300/v0/amp-mustache-0.1.js';
 
     const cacheName = 'AMP-VERSIONED-CACHE';
 
