@@ -74,6 +74,6 @@ function runMochaForBrowser(driver) {
     })
     .on('end', function() {
       seleniumAssistant.killWebDriver(driver);
-      global.__AMPSW.server.stop();
+      //global.__AMPSW.server.stop();
     });
 }
