@@ -26,6 +26,7 @@ class AmpDocumentCachablePlugin {
     if (responseContentType && responseContentType.includes('text/html')) {
       try {
         const responseBody = await clonedResponse.text();
+        // Check if the response is AMP HTML page, only then cache it.
         if (/<html (⚡|amphtml)/.test(responseBody)) {
           return response;
         }
@@ -34,9 +35,8 @@ class AmpDocumentCachablePlugin {
       }
       return null;
     }
-
-    // Non HTML responses will be allowed to be cached
-    return response;
+    // Non HTML responses will/should have reached here in first place.
+    return null;
   }
 }
 
@@ -49,6 +49,7 @@ export function documentCaching(
     blacklist?: Array<RegExp>;
   } = {};
 
+  // create regexp Array from parsing the string array
   if (documentCachingOptions.allowList) {
     navigationPreloadOptions.whitelist = documentCachingOptions.allowList
       .map(re => regexpParse(re))
@@ -71,6 +72,9 @@ export function documentCaching(
   );
 }
 
+/**
+ * Given a URL, this checks if its an AMP URL and caches it.
+ */
 export async function cacheAMPDocument(url: string) {
   const request = new Request(url, { mode: 'same-origin' });
   const response = await fetch(request);

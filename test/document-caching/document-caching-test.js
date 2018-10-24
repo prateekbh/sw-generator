@@ -113,7 +113,7 @@ describe('Document Caching Module', function() {
     }, cacheName);
     expect(cachedData).to.be.null;
   });
-  it('should respond from cache if server does not respond', async () => {
+  it.skip('should respond from cache if server does not respond', async () => {
     this.timeout(8000);
     const generatedSW = await buildSW();
     await writeFile(serviceWorkerPath, generatedSW);
@@ -130,6 +130,27 @@ describe('Document Caching Module', function() {
     global.__AMPSW.server.start();
   });
   // TODO: figure out how to test navigation preloading
+
+  describe('cacheAMPDocument', function() {
+    it('should be caching the current page URL if its an AMP page', async () => {
+      const generatedSW = await buildSW();
+      await writeFile(serviceWorkerPath, generatedSW);
+      await driver.get('http://localhost:6881/test/index.html');
+      await performCleanupAndWaitForSWActivation(driver);
+      let cachedData = await driver.executeAsyncScript(
+        async (cacheName, cb) => {
+          const cache = await caches.open(cacheName);
+          cb(
+            await cache.match(
+              new Request('http://localhost:6881/test/index.html'),
+            ),
+          );
+        },
+        cacheName,
+      );
+      expect(cachedData).to.be.null;
+    });
+  });
 });
 
 async function performCleanupAndWaitForSWActivation(driver) {
