@@ -1,13 +1,17 @@
 import { join } from 'path';
 import { rollup } from 'rollup';
+import { DocumentCachingOptions } from '../generator/modules/document-caching';
+import { AssetCachingOptions } from '../generator/modules/asset-caching';
+import getBabelConfig from './babel';
+
 // @ts-ignore
 import npmRun from 'npm-run';
 // @ts-ignore
 import replace from 'rollup-plugin-re';
 // @ts-ignore
 import resolve from 'rollup-plugin-node-resolve';
-import { DocumentCachingOptions } from '../generator/modules/document-caching';
-import { AssetCachingOptions } from '../generator/modules/asset-caching';
+// @ts-ignore
+import babel from 'rollup-plugin-babel';
 //import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
 export async function buildSW(
@@ -72,6 +76,19 @@ export async function buildSW(
     });
   }
 
+  const babelConfig = getBabelConfig();
+
+  if (!assetCachingOptions || assetCachingOptions.length === 0) {
+    babelConfig.plugins.push([
+      'filter-imports',
+      {
+        imports: {
+          './modules/asset-caching/index': ['cacheAssets'],
+        },
+      },
+    ]);
+  }
+
   // rollup the files in the tempdir
   const bundle = await rollup({
     input: join('lib', 'generator', 'index.js'),
@@ -80,6 +97,7 @@ export async function buildSW(
         patterns: replacePatterns,
       }),
       resolve({}),
+      babel(babelConfig),
       /* TODO: uncomment this after https://github.com/ampproject/rollup-plugin-closure-compiler/issues/92
       * is resolved
       */

@@ -1,4 +1,4 @@
-import {buildSW} from '../';
+import {buildSW} from '../lib/builder';
 import * as fs from 'fs';
 import * as path from 'path';
 import {promisify} from 'util';
