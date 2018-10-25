@@ -2,6 +2,7 @@ import { buildSW } from '../../lib/builder/index';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { join } from 'path';
+import { performCleanupAndWaitForSWActivation } from '../test-utils/sw-installer';
 
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
@@ -10,7 +11,6 @@ const cacheName = 'AMP-PUBLISHER-CACHE';
 describe('Document Caching Module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'document-caching-sw.js');
-  this.timeout(5000);
 
   after(async () => {
     await unlink(serviceWorkerPath);
@@ -36,7 +36,7 @@ describe('Document Caching Module', function() {
     });
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
-    await performCleanupAndWaitForSWActivation(driver);
+    await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     await driver.get('http://localhost:6881/test/accordian.amp.html');
     let cachedData = await driver.executeAsyncScript(async (cacheName, cb) => {
@@ -66,7 +66,7 @@ describe('Document Caching Module', function() {
     });
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
-    await performCleanupAndWaitForSWActivation(driver);
+    await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     await driver.get('http://localhost:6881/test/accordian.amp.html');
     let cachedData = await driver.executeAsyncScript(async (cacheName, cb) => {
@@ -92,7 +92,7 @@ describe('Document Caching Module', function() {
     const generatedSW = await buildSW();
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
-    await performCleanupAndWaitForSWActivation(driver);
+    await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     // doing round trip because the service worker is lazy
     await driver.get('http://localhost:6881/test/index.html');
@@ -118,7 +118,7 @@ describe('Document Caching Module', function() {
     const generatedSW = await buildSW();
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
-    await performCleanupAndWaitForSWActivation(driver);
+    await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     await driver.get('http://localhost:6881/test/index.html');
     global.__AMPSW.server.stop();
@@ -136,7 +136,10 @@ describe('Document Caching Module', function() {
       const generatedSW = await buildSW();
       await writeFile(serviceWorkerPath, generatedSW);
       await driver.get('http://localhost:6881/test/index.html');
-      await performCleanupAndWaitForSWActivation(driver);
+      await performCleanupAndWaitForSWActivation(
+        driver,
+        `/${serviceWorkerPath}`,
+      );
       let cachedData = await driver.executeAsyncScript(
         async (cacheName, cb) => {
           const cache = await caches.open(cacheName);
@@ -164,7 +167,11 @@ describe('Document Caching Module', function() {
         document.body.appendChild(waitScript);
         cb();
       });
-      await performCleanupAndWaitForSWActivation(driver, false);
+      await performCleanupAndWaitForSWActivation(
+        driver,
+        `/${serviceWorkerPath}`,
+        false,
+      );
       let cachedData = await driver.executeAsyncScript(
         async (cacheName, cb) => {
           const cache = await caches.open(cacheName);
@@ -180,23 +187,3 @@ describe('Document Caching Module', function() {
     });
   });
 });
-
-async function performCleanupAndWaitForSWActivation(
-  driver,
-  performRefresh = true,
-) {
-  performRefresh && (await driver.navigate().refresh());
-  await driver.executeAsyncScript(async cb => {
-    await window.__testCleanup();
-    const registration = await navigator.serviceWorker.register(
-      '/test/document-caching-sw.js',
-    );
-    await window.__waitForSWState(registration, 'activated');
-    cb();
-  });
-  const swRegCount = await driver.executeAsyncScript(async cb => {
-    const regs = await navigator.serviceWorker.getRegistrations();
-    cb(regs.length);
-  });
-  expect(swRegCount).to.be.equal(1);
-}

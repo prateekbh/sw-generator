@@ -82,6 +82,7 @@ function runMochaForBrowser(driver) {
   }
   // Run the tests.
   mocha
+    .timeout(7000)
     .run(function(failures) {
       process.exitCode = failures ? -1 : 0; // exit with non-zero status if there were failures
     })
