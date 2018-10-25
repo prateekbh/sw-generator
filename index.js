@@ -5,7 +5,10 @@ import replace from 'rollup-plugin-re';
 import resolve from 'rollup-plugin-node-resolve';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
-export async function buildSW({ documentCachingOptions } = {}) {
+export async function buildSW({
+  documentCachingOptions,
+  assetCachingOptions,
+} = {}) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
@@ -38,6 +41,21 @@ export async function buildSW({ documentCachingOptions } = {}) {
       test: '__REPLACE_CONFIG_documentCachingOptions = {}',
       replace: `__REPLACE_CONFIG_documentCachingOptions = ${JSON.stringify(
         tempDocCachingOptions,
+      )}`,
+    });
+  }
+
+  if (assetCachingOptions) {
+    const tempAssetCachingOptions = assetCachingOptions.map(config => {
+      return {
+        regexp: config.regexp.toString(),
+        cachingStrategy: config.cachingStrategy,
+      };
+    });
+    replacePatterns.push({
+      test: '__REPLACE_CONFIG_assetCachingOptions = []',
+      replace: `__REPLACE_CONFIG_assetCachingOptions = ${JSON.stringify(
+        tempAssetCachingOptions,
       )}`,
     });
   }
