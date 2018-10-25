@@ -2,6 +2,7 @@ import { buildSW } from '../../lib/builder/index';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { join } from 'path';
+import { testStaleWhileRevalidate } from '../strategy-tests/strategy-tests';
 
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
@@ -12,38 +13,37 @@ describe('AMP Caching Module', function() {
   this.timeout(5000);
 
   before(async () => {
-    const generatedSW = await buildSW();
-    await writeFile(serviceWorkerPath, generatedSW);
-    await driver.get('http://localhost:6881/test/index.html');
+    const generatedSW = await buildSW({});
+    //await writeFile(serviceWorkerPath, generatedSW);
   });
 
   after(async () => {
-    await unlink(serviceWorkerPath);
+    //await unlink(serviceWorkerPath);
   });
 
-  beforeEach(async () => {
-    await driver.navigate().refresh();
-    await driver.executeAsyncScript(async cb => {
-      await window.__testCleanup();
-      const registration = await navigator.serviceWorker.register(
-        '/test/amp-caching-sw.js',
-      );
-      await window.__waitForSWState(registration, 'activated');
-      cb();
-    });
-    const swRegCount = await driver.executeAsyncScript(async cb => {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      cb(regs.length);
-    });
-    expect(swRegCount).to.be.equal(1);
-  });
+  // beforeEach(async () => {
+  //   await driver.navigate().refresh();
+  //   await driver.executeAsyncScript(async cb => {
+  //     await window.__testCleanup();
+  //     const registration = await navigator.serviceWorker.register(
+  //       '/test/amp-caching-sw.js',
+  //     );
+  //     await window.__waitForSWState(registration, 'activated');
+  //     cb();
+  //   });
+  //   const swRegCount = await driver.executeAsyncScript(async cb => {
+  //     const regs = await navigator.serviceWorker.getRegistrations();
+  //     cb(regs.length);
+  //   });
+  //   expect(swRegCount).to.be.equal(1);
+  // });
 
-  afterEach(async () => {
-    await driver.executeAsyncScript(async cb => {
-      await window.__testCleanup();
-      cb();
-    });
-  });
+  // afterEach(async () => {
+  //   await driver.executeAsyncScript(async cb => {
+  //     await window.__testCleanup();
+  //     cb();
+  //   });
+  // });
 
   describe('Versioned JS', () => {
     const ampRuntime = 'https://cdn.ampproject.org/rtv/011810152207300/v0.js';
@@ -54,16 +54,16 @@ describe('AMP Caching Module', function() {
 
     const filesToTest = [ampRuntime, ampExtension];
     filesToTest.forEach(scriptURL => {
-      it('should create a cache in cache name, once fetched', () =>
+      it.skip('should create a cache in cache name, once fetched', () =>
         checkCacheCreation(cacheName, driver, scriptURL));
 
-      it('should fetch and store the versioned jS', () =>
+      it.skip('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it('should not fetch versioned js anymore from network', () =>
+      it.skip('should not fetch versioned js anymore from network', () =>
         checkForCachedResponse(cacheName, scriptURL, driver));
 
-      it('should not expire cached Response after 13 days', async () => {
+      it.skip('should not expire cached Response after 13 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -73,7 +73,7 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.be.equal('dummy response');
       });
 
-      it('should expire cached Response after 15 days', async () => {
+      it.skip('should expire cached Response after 15 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -93,13 +93,13 @@ describe('AMP Caching Module', function() {
 
     const filesToTest = [ampRuntime, ampMustacheExtension];
     filesToTest.forEach(scriptURL => {
-      it('should create a cache in cache name, once fetched', async () =>
+      it.skip('should create a cache in cache name, once fetched', async () =>
         checkCacheCreation(cacheName, driver, scriptURL));
 
-      it('should fetch and store the versioned jS', () =>
+      it.skip('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it('should not expire cached Response after an hour', async () => {
+      it.skip('should not expire cached Response after an hour', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -109,7 +109,7 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.be.equal('dummy response');
       });
 
-      it('should expire cached Response after 2 days', async () => {
+      it.skip('should expire cached Response after 2 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -119,53 +119,12 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.not.be.equal('dummy response');
       });
 
-      it('should refresh the cache from network everytime', async () => {
-        const DUMMY_RESPONSE = 'dummy response';
-        const networkResponse = await driver.executeAsyncScript(
-          async (scriptURL, cb) => {
-            const response = await fetch(scriptURL);
-            const text = await response.text();
-            cb(text);
-          },
-          scriptURL,
-        );
-        // 1st response should be actual response from network
-        expect(networkResponse).to.not.be.equal(DUMMY_RESPONSE);
-        const cacheResponse = await driver.executeAsyncScript(
-          async (cacheName, scriptURL, DUMMY_RESPONSE, cb) => {
-            const cache = await caches.open(cacheName);
-            await cache.put(
-              new Request(scriptURL),
-              new Response(DUMMY_RESPONSE),
-            );
-            const response = await fetch(scriptURL);
-            const text = await response.text();
-            cb(text);
-          },
-          cacheName,
-          scriptURL,
-          DUMMY_RESPONSE,
-        );
-        // 2nd response should be the dummy response
-        expect(cacheResponse).to.be.equal(DUMMY_RESPONSE);
-        const storedCacheResponse = await driver.executeAsyncScript(
-          async (cacheName, scriptURL, cb) => {
-            const cache = await caches.open(cacheName);
-            const response = await cache.match(scriptURL);
-            const text = await response.text();
-            cb(text);
-          },
-          cacheName,
-          scriptURL,
-        );
-        // 3rd response will again be equal to network response because `stale-while-revalidate`
-        expect(storedCacheResponse).to.not.be.equal(DUMMY_RESPONSE);
-        expect(storedCacheResponse).to.be.equal(networkResponse);
-      });
+      it.skip('should refresh the cache from network everytime', () =>
+        testStaleWhileRevalidate(driver, scriptURL, cacheName));
     });
   });
 
-  it('should cache AMP scripts given by postMessage', async () => {
+  it.skip('should cache AMP scripts given by postMessage', async () => {
     await driver.get('http://localhost:6881/test/index.html');
     const cacheName = 'AMP-VERSIONED-CACHE';
     const payload = [
