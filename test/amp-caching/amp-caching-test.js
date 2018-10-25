@@ -12,38 +12,35 @@ describe('AMP Caching Module', function() {
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
   this.timeout(5000);
 
-  before(async () => {
-    const generatedSW = await buildSW({});
-    //await writeFile(serviceWorkerPath, generatedSW);
-  });
-
   after(async () => {
-    //await unlink(serviceWorkerPath);
+    await unlink(serviceWorkerPath);
   });
 
-  // beforeEach(async () => {
-  //   await driver.navigate().refresh();
-  //   await driver.executeAsyncScript(async cb => {
-  //     await window.__testCleanup();
-  //     const registration = await navigator.serviceWorker.register(
-  //       '/test/amp-caching-sw.js',
-  //     );
-  //     await window.__waitForSWState(registration, 'activated');
-  //     cb();
-  //   });
-  //   const swRegCount = await driver.executeAsyncScript(async cb => {
-  //     const regs = await navigator.serviceWorker.getRegistrations();
-  //     cb(regs.length);
-  //   });
-  //   expect(swRegCount).to.be.equal(1);
-  // });
+  beforeEach(async () => {
+    const generatedSW = await buildSW({});
+    await writeFile(serviceWorkerPath, generatedSW);
+    await driver.navigate().refresh();
+    await driver.executeAsyncScript(async cb => {
+      await window.__testCleanup();
+      const registration = await navigator.serviceWorker.register(
+        '/test/amp-caching-sw.js',
+      );
+      await window.__waitForSWState(registration, 'activated');
+      cb();
+    });
+    const swRegCount = await driver.executeAsyncScript(async cb => {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      cb(regs.length);
+    });
+    expect(swRegCount).to.be.equal(1);
+  });
 
-  // afterEach(async () => {
-  //   await driver.executeAsyncScript(async cb => {
-  //     await window.__testCleanup();
-  //     cb();
-  //   });
-  // });
+  afterEach(async () => {
+    await driver.executeAsyncScript(async cb => {
+      await window.__testCleanup();
+      cb();
+    });
+  });
 
   describe('Versioned JS', () => {
     const ampRuntime = 'https://cdn.ampproject.org/rtv/011810152207300/v0.js';
