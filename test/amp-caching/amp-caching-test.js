@@ -18,7 +18,7 @@ describe('AMP Caching Module', function() {
   });
 
   after(async () => {
-    //await unlink(serviceWorkerPath);
+    await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
