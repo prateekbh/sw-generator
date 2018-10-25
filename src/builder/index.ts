@@ -1,18 +1,28 @@
-import npmRun from 'npm-run';
 import { join } from 'path';
 import { rollup } from 'rollup';
+// @ts-ignore
+import npmRun from 'npm-run';
+// @ts-ignore
 import replace from 'rollup-plugin-re';
+// @ts-ignore
 import resolve from 'rollup-plugin-node-resolve';
-import compiler from '@ampproject/rollup-plugin-closure-compiler';
+import { DocumentCachingOptions } from '../generator/modules/document-caching';
+import { AssetCachingOptions } from '../generator/modules/asset-caching';
+//import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
-export async function buildSW({
-  documentCachingOptions,
-  assetCachingOptions,
-} = {}) {
+export async function buildSW(
+  {
+    documentCachingOptions,
+    assetCachingOptions,
+  }: {
+    documentCachingOptions: DocumentCachingOptions | null;
+    assetCachingOptions: AssetCachingOptions | null;
+  } = { documentCachingOptions: null, assetCachingOptions: null },
+) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
-  npmRun.sync(`tsc -p ./src/tsconfig.json --outDir output`);
+  npmRun.sync(`tsc -p ./src/tsconfig.json --outDir lib`);
 
   const replacePatterns = [
     {
@@ -23,16 +33,18 @@ export async function buildSW({
 
   if (documentCachingOptions) {
     // Manually traverse through both lists as JSON.stringify does not work for regexp
-    const tempDocCachingOptions = {};
+    const tempDocCachingOptions: DocumentCachingOptions = {};
     if (documentCachingOptions.allowList) {
       tempDocCachingOptions.allowList = [];
       documentCachingOptions.allowList.forEach(regexp => {
-        tempDocCachingOptions.allowList.push(regexp.toString());
+        tempDocCachingOptions.allowList &&
+          tempDocCachingOptions.allowList.push(regexp.toString());
       });
     } else if (documentCachingOptions.denyList) {
       tempDocCachingOptions.denyList = [];
       documentCachingOptions.denyList.forEach(regexp => {
-        tempDocCachingOptions.denyList.push(regexp.toString());
+        tempDocCachingOptions.denyList &&
+          tempDocCachingOptions.denyList.push(regexp.toString());
       });
     }
     tempDocCachingOptions.timeoutSeconds =
@@ -62,7 +74,7 @@ export async function buildSW({
 
   // rollup the files in the tempdir
   const bundle = await rollup({
-    input: join('output', 'index.js'),
+    input: join('lib', 'generator', 'index.js'),
     plugins: [
       replace({
         patterns: replacePatterns,
@@ -80,7 +92,7 @@ export async function buildSW({
   const { code } = await bundle.generate({
     name: 'AmpServiceWorker',
     format: 'es',
-    sourceMap: true,
+    sourcemap: true,
   });
 
   return code;

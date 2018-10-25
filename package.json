@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "debug:transpile": "tsc -p ./src/tsconfig.json --outDir output",
+    "transpile": "tsc -p ./src/tsconfig.json --outDir lib",
+    "pretest": "npm run transpile",
     "test": "node -r esm ./test/index.js",
-    "test:local": "node -r esm ./test/index.js --local",
     "start": "node -r esm ./index.js",
+    "presample": "npm run transpile",
     "sample": "node -r esm ./sample/serve.js"
   },
   "repository": {

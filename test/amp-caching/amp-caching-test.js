@@ -1,4 +1,4 @@
-import { buildSW } from '../../index';
+import { buildSW } from '../../lib/builder/index';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { join } from 'path';
@@ -18,7 +18,7 @@ describe('AMP Caching Module', function() {
   });
 
   after(async () => {
-    await unlink(serviceWorkerPath);
+    //await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
@@ -196,9 +196,9 @@ describe('AMP Caching Module', function() {
         }
         // TODO: find a better solution to this.
         // Allow script to be put in cache
-        // await new Promise(resolve => setTimeout(resolve, 500));
-        // const cache = await caches.open(cacheName);
-        // cb((await cache.keys()).map(request => request.url));
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const cache = await caches.open(cacheName);
+        cb((await cache.keys()).map(request => request.url));
       },
       cacheName,
       payload,
