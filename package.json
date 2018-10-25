@@ -39,7 +39,6 @@
     "npm-run": "5.0.1",
     "prettier": "1.14.3",
     "promisify": "0.0.3",
-    "puppeteer": "1.9.0",
     "rollup": "0.66.6",
     "rollup-plugin-babel": "4.0.3",
     "rollup-plugin-node-resolve": "3.4.0",

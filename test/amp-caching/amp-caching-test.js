@@ -10,15 +10,18 @@ const unlink = promisify(fs.unlink);
 describe('AMP Caching Module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
-  this.timeout(5000);
+  this.timeout(7000);
+
+  before(async () => {
+    const generatedSW = await buildSW({});
+    await writeFile(serviceWorkerPath, generatedSW);
+  });
 
   after(async () => {
     await unlink(serviceWorkerPath);
   });
 
   beforeEach(async () => {
-    const generatedSW = await buildSW({});
-    await writeFile(serviceWorkerPath, generatedSW);
     await driver.navigate().refresh();
     await driver.executeAsyncScript(async cb => {
       await window.__testCleanup();
@@ -51,16 +54,16 @@ describe('AMP Caching Module', function() {
 
     const filesToTest = [ampRuntime, ampExtension];
     filesToTest.forEach(scriptURL => {
-      it.skip('should create a cache in cache name, once fetched', () =>
+      it('should create a cache in cache name, once fetched', () =>
         checkCacheCreation(cacheName, driver, scriptURL));
 
-      it.skip('should fetch and store the versioned jS', () =>
+      it('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it.skip('should not fetch versioned js anymore from network', () =>
+      it('should not fetch versioned js anymore from network', () =>
         checkForCachedResponse(cacheName, scriptURL, driver));
 
-      it.skip('should not expire cached Response after 13 days', async () => {
+      it('should not expire cached Response after 13 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -70,7 +73,7 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.be.equal('dummy response');
       });
 
-      it.skip('should expire cached Response after 15 days', async () => {
+      it('should expire cached Response after 15 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -90,13 +93,13 @@ describe('AMP Caching Module', function() {
 
     const filesToTest = [ampRuntime, ampMustacheExtension];
     filesToTest.forEach(scriptURL => {
-      it.skip('should create a cache in cache name, once fetched', async () =>
+      it('should create a cache in cache name, once fetched', async () =>
         checkCacheCreation(cacheName, driver, scriptURL));
 
-      it.skip('should fetch and store the versioned jS', () =>
+      it('should fetch and store the versioned jS', () =>
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
-      it.skip('should not expire cached Response after an hour', async () => {
+      it('should not expire cached Response after an hour', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -106,7 +109,7 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.be.equal('dummy response');
       });
 
-      it.skip('should expire cached Response after 2 days', async () => {
+      it('should expire cached Response after 2 days', async () => {
         const responseText = await getPrePostCacheData(
           cacheName,
           scriptURL,
@@ -116,12 +119,12 @@ describe('AMP Caching Module', function() {
         expect(responseText).to.not.be.equal('dummy response');
       });
 
-      it.skip('should refresh the cache from network everytime', () =>
+      it('should refresh the cache from network everytime', () =>
         testStaleWhileRevalidate(driver, scriptURL, cacheName));
     });
   });
 
-  it.skip('should cache AMP scripts given by postMessage', async () => {
+  it('should cache AMP scripts given by postMessage', async () => {
     await driver.get('http://localhost:6881/test/index.html');
     const cacheName = 'AMP-VERSIONED-CACHE';
     const payload = [
