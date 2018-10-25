@@ -12,6 +12,8 @@ export type DocumentCachingOptions = {
   timeoutSeconds?: Number;
 };
 
+const cacheName = 'AMP-PUBLISHER-CACHE';
+
 class AmpDocumentCachablePlugin {
   async cacheWillUpdate({
     response,
@@ -24,9 +26,8 @@ class AmpDocumentCachablePlugin {
     if (responseContentType && responseContentType.includes('text/html')) {
       try {
         const responseBody = await clonedResponse.text();
-        // do go looking for amphtml attr in the entire doc
-        const responseText = responseBody.substring(0, 500);
-        if (/<html (⚡|amphtml)/.test(responseText)) {
+        // Check if the response is AMP HTML page, only then cache it.
+        if (/<html (⚡|amphtml)/.test(responseBody)) {
           return response;
         }
       } catch (e) {
@@ -34,9 +35,8 @@ class AmpDocumentCachablePlugin {
       }
       return null;
     }
-
-    // Non HTML responses will be allowed to be cached
-    return response;
+    // Non HTML responses will/should have reached here in first place.
+    return null;
   }
 }
 
@@ -49,6 +49,7 @@ export function documentCaching(
     blacklist?: Array<RegExp>;
   } = {};
 
+  // create regexp Array from parsing the string array
   if (documentCachingOptions.allowList) {
     navigationPreloadOptions.whitelist = documentCachingOptions.allowList
       .map(re => regexpParse(re))
@@ -62,11 +63,35 @@ export function documentCaching(
   router.registerRoute(
     new NavigationRoute(
       new NetworkFirst({
-        cacheName: 'AMP-PUBLISHER-CACHE',
+        cacheName,
         plugins: [new AmpDocumentCachablePlugin()],
         networkTimeoutSeconds: documentCachingOptions.timeoutSeconds || 2,
       }),
       navigationPreloadOptions,
     ),
   );
+}
+
+/**
+ * Given a URL, this checks if its an AMP URL and caches it.
+ */
+export function cacheAMPDocument(clients: ReadonlyArray<Client>) {
+  return clients.map(async (client: Client) => {
+    if (client && client.url) {
+      try {
+        const request = new Request(client.url, { mode: 'same-origin' });
+        const response = await fetch(request);
+        const ampCachablePlugin = new AmpDocumentCachablePlugin();
+        const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
+          response,
+        });
+        const cache = await caches.open(cacheName);
+        if (responseToBeCached) {
+          cache.put(request, responseToBeCached);
+        }
+      } catch (e) {
+        // noop cuz we dont want to stop SW activation
+      }
+    }
+  });
 }

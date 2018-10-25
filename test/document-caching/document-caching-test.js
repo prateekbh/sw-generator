@@ -95,7 +95,7 @@ describe('Document Caching Module', function() {
     await performCleanupAndWaitForSWActivation(driver);
     await driver.get('http://localhost:6881/test/alternate.amp.html');
     // doing round trip because the service worker is lazy
-    await driver.get('http://localhost:6881/test/index.amp.html');
+    await driver.get('http://localhost:6881/test/index.html');
     let cachedData = await driver.executeAsyncScript(async (cacheName, cb) => {
       const cache = await caches.open(cacheName);
       cb(
@@ -127,13 +127,65 @@ describe('Document Caching Module', function() {
       cb(document.querySelector('amp-img'));
     });
     expect(element).to.not.be.null;
-    global.__AMPSW.server.start();
+    await global.__AMPSW.server.start();
   });
   // TODO: figure out how to test navigation preloading
+
+  describe('cacheAMPDocument', function() {
+    it('should be not cache the current page URL if its not AMP page', async () => {
+      const generatedSW = await buildSW();
+      await writeFile(serviceWorkerPath, generatedSW);
+      await driver.get('http://localhost:6881/test/index.html');
+      await performCleanupAndWaitForSWActivation(driver);
+      let cachedData = await driver.executeAsyncScript(
+        async (cacheName, cb) => {
+          const cache = await caches.open(cacheName);
+          cb(
+            await cache.match(
+              new Request('http://localhost:6881/test/index.html'),
+            ),
+          );
+        },
+        cacheName,
+      );
+      expect(cachedData).to.be.null;
+    });
+    it('should be cache the current page URL if its not AMP page', async () => {
+      const generatedSW = await buildSW();
+      await writeFile(serviceWorkerPath, generatedSW);
+      await driver.get('http://localhost:6881/test/alternate.amp.html');
+      await driver.executeAsyncScript(cb => {
+        // install util scripts
+        const cleanupScript = document.createElement('script');
+        cleanupScript.src = '/test/test-utils/sw-test-cleanup.js';
+        document.body.appendChild(cleanupScript);
+        const waitScript = document.createElement('script');
+        waitScript.src = '/test/test-utils/wait-for-sw-state.js';
+        document.body.appendChild(waitScript);
+        cb();
+      });
+      await performCleanupAndWaitForSWActivation(driver, false);
+      let cachedData = await driver.executeAsyncScript(
+        async (cacheName, cb) => {
+          const cache = await caches.open(cacheName);
+          cb(
+            await cache.match(
+              new Request('http://localhost:6881/test/alternate.amp.html'),
+            ),
+          );
+        },
+        cacheName,
+      );
+      expect(cachedData).to.not.be.null;
+    });
+  });
 });
 
-async function performCleanupAndWaitForSWActivation(driver) {
-  await driver.navigate().refresh();
+async function performCleanupAndWaitForSWActivation(
+  driver,
+  performRefresh = true,
+) {
+  performRefresh && (await driver.navigate().refresh());
   await driver.executeAsyncScript(async cb => {
     await window.__testCleanup();
     const registration = await navigator.serviceWorker.register(

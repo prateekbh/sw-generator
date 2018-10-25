@@ -1,8 +1,9 @@
 import {buildSW} from '../';
-import serve from 'serve';
 import * as fs from 'fs';
 import * as path from 'path';
 import {promisify} from 'util';
+import nodeStatic from 'node-static';
+import http from 'http';
 
 const writeFile = promisify(fs.writeFile);
 
@@ -13,5 +14,15 @@ const writeFile = promisify(fs.writeFile);
     }
   });
   await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
-  serve(__dirname);
+  const serveDir = new nodeStatic.Server('./sample');
+  http.createServer((request, response) => {
+    request.addListener('end', function () {
+      //
+      // Serve files!
+      //
+      serveDir.serve(request, response);
+    }).resume();
+  }).listen(5000, () => {
+    console.log('listening on http://localhost:5000/');
+  });
 })();
