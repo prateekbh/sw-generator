@@ -1,4 +1,4 @@
-import { buildSW } from '../../index';
+import { buildSW } from '../../lib/builder/index';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { join } from 'path';

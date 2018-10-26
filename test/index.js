@@ -47,7 +47,7 @@ const server = http.createServer((request, response) => {
     },
   };
 
-  global.__AMPSW.server.start();
+  await global.__AMPSW.server.start();
 
   const browsers = seleniumAssistant.getLocalBrowsers();
   browsers.forEach(async browser => {

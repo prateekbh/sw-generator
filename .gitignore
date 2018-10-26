@@ -64,7 +64,7 @@ typings/
 .DS_store
 
 # project output folders
-output
+lib
 build
 
 #generated service workers in test and sample folder

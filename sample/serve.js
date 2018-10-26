@@ -1,4 +1,4 @@
-import {buildSW} from '../';
+import {buildSW} from '../lib/builder';
 import * as fs from 'fs';
 import * as path from 'path';
 import {promisify} from 'util';
@@ -11,7 +11,13 @@ const writeFile = promisify(fs.writeFile);
   const serviceWorker = await buildSW({
     documentCachingOptions: {
       denyList: [/menu.amp.html/],
-    }
+    },
+    assetCachingOptions: [
+      {
+        regexp: /.(jpg|png|gif)$/,
+        cachingStrategy: 'CACHE_FIRST'
+      }
+    ]
   });
   await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
   const serveDir = new nodeStatic.Server('./sample');
