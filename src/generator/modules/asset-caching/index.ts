@@ -14,18 +14,31 @@ import { regexpParse } from '../../utils/regexp_parser';
 export type AssetCachingOptions = Array<{
   regexp: string;
   cachingStrategy: string;
+  denyList: string;
 }>;
 
 class AssetCachingPlugin extends Plugin {
-  constructor(config: any) {
+  denyList_?: Array<string>;
+
+  constructor(config: any, denyList?: Array<string>) {
     super(config);
+    this.denyList_ = denyList;
   }
   async cacheWillUpdate({
+    request,
     response,
   }: {
+    request: Request;
     response: Response;
   }): Promise<Response | null> {
     let returnedResponse: Response | null = null;
+    this.denyList_ &&
+      this.denyList_.forEach(deniedUrl => {
+        const deniedUrlRegexp: RegExp | null = regexpParse(deniedUrl);
+        if (deniedUrlRegexp && deniedUrlRegexp.test(request.url)) {
+          return null;
+        }
+      });
     if (super.cacheWillUpdate) {
       returnedResponse = await super.cacheWillUpdate({ response });
     } else {
