@@ -79,6 +79,7 @@ function runMochaForBrowser(driver) {
     mocha.addFile(
       join(__dirname, 'document-caching', 'document-caching-test.js'),
     );
+    mocha.addFile(join(__dirname, 'builder', 'serialize-test.js'));
   }
   // Run the tests.
   mocha
