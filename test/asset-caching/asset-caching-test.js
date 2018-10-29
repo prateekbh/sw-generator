@@ -14,7 +14,7 @@ const unlink = promisify(fs.unlink);
 const serviceWorkerPath = join('test', 'asset-caching-sw.js');
 const cacheName = 'AMP-ASSET-CACHE';
 
-describe('Document Caching Module', function() {
+describe('Asset Caching Module', function() {
   const driver = global.__AMPSW.driver;
   const regexp = /^http:\/\/localhost:6881\/test\/fixtures\//;
 
