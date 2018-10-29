@@ -33,6 +33,20 @@ describe('serializeObject', () => {
       wrapSerializedValueIntoFunction(serializedValue)(),
     );
   });
+  it('should serialize arrays', () => {
+    const obj = [
+      {
+        key: {
+          subkey: 'value',
+          indexes: [0, 4, 5],
+        },
+      },
+    ];
+    const serializedValue = serializeObject(obj);
+    expect(obj).to.deep.equal(
+      wrapSerializedValueIntoFunction(serializedValue)(),
+    );
+  });
 });
 
 function wrapSerializedValueIntoFunction(serializedValue) {
