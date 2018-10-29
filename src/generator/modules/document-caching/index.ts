@@ -4,6 +4,8 @@ import router, { NavigationRoute } from 'workbox-routing';
 import { NetworkFirst } from 'workbox-strategies';
 // @ts-ignore
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
+// @ts-ignore
+import { Plugin } from 'workbox-cache-expiration';
 
 export type DocumentCachingOptions = {
   allowList?: Array<RegExp>;
@@ -13,7 +15,10 @@ export type DocumentCachingOptions = {
 
 const cacheName = 'AMP-PUBLISHER-CACHE';
 
-class AmpDocumentCachablePlugin {
+class AmpDocumentCachablePlugin extends Plugin {
+  constructor(config: any) {
+    super(config);
+  }
   async cacheWillUpdate({
     response,
   }: {
@@ -59,7 +64,11 @@ export function documentCaching(
     new NavigationRoute(
       new NetworkFirst({
         cacheName,
-        plugins: [new AmpDocumentCachablePlugin()],
+        plugins: [
+          new AmpDocumentCachablePlugin({
+            maxEntries: 10,
+          }),
+        ],
         networkTimeoutSeconds: documentCachingOptions.timeoutSeconds || 2,
       }),
       navigationPreloadOptions,
@@ -76,7 +85,9 @@ export function cacheAMPDocument(clients: ReadonlyArray<Client>) {
       try {
         const request = new Request(client.url, { mode: 'same-origin' });
         const response = await fetch(request);
-        const ampCachablePlugin = new AmpDocumentCachablePlugin();
+        const ampCachablePlugin = new AmpDocumentCachablePlugin({
+          maxEntries: 10,
+        });
         const responseToBeCached = await ampCachablePlugin.cacheWillUpdate({
           response,
         });
