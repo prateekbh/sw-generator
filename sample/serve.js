@@ -15,7 +15,7 @@ const writeFile = promisify(fs.writeFile);
     assetCachingOptions: [
       {
         regexp: /.(jpg|png|gif)$/,
-        cachingStrategy: 'CACHE_FIRST'
+        cachingStrategy: 'STALE_WHILE_REVALIDATE'
       }
     ]
   });

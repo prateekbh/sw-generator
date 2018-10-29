@@ -6,21 +6,19 @@ import {
   StaleWhileRevalidate,
   // @ts-ignore
 } from 'workbox-strategies';
-//import { regexpParse } from '../../utils/regexp_parser';
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
-import { regexpParse } from '../../utils/regexp_parser';
 
 export type AssetCachingOptions = Array<{
-  regexp: string;
-  cachingStrategy: string;
-  denyList: string;
+  regexp: RegExp;
+  cachingStrategy: 'NETWORK_FIRST' | 'CACHE_FIRST' | 'STALE_WHILE_REVALIDATE';
+  denyList?: Array<RegExp>;
 }>;
 
 class AssetCachingPlugin extends Plugin {
-  denyList_?: Array<string>;
+  denyList_?: Array<RegExp>;
 
-  constructor(config: any, denyList?: Array<string>) {
+  constructor(config: any, denyList?: Array<RegExp>) {
     super(config);
     this.denyList_ = denyList;
   }
@@ -33,9 +31,8 @@ class AssetCachingPlugin extends Plugin {
   }): Promise<Response | null> {
     let returnedResponse: Response | null = null;
     this.denyList_ &&
-      this.denyList_.forEach(deniedUrl => {
-        const deniedUrlRegexp: RegExp | null = regexpParse(deniedUrl);
-        if (deniedUrlRegexp && deniedUrlRegexp.test(request.url)) {
+      this.denyList_.forEach(deniedUrlRegExp => {
+        if (deniedUrlRegExp.test(request.url)) {
           return null;
         }
       });
@@ -80,9 +77,6 @@ export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
         break;
     }
 
-    router.registerRoute(
-      regexpParse(assetCachingOption.regexp),
-      cachingStrategy,
-    );
+    router.registerRoute(assetCachingOption.regexp, cachingStrategy);
   });
 }
