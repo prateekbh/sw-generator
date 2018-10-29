@@ -14,8 +14,8 @@ const writeFile = promisify(fs.writeFile);
     },
     assetCachingOptions: [
       {
-        regexp: /.(jpg|png|gif)$/,
-        cachingStrategy: 'CACHE_FIRST'
+        regexp: /^https:\/\/demo-pwamp.surge.sh\/img\/themes_2\//,
+        cachingStrategy: 'STALE_WHILE_REVALIDATE'
       }
     ]
   });
