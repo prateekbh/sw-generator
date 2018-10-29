@@ -4,11 +4,10 @@ import router, { NavigationRoute } from 'workbox-routing';
 import { NetworkFirst } from 'workbox-strategies';
 // @ts-ignore
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
-import { regexpParse } from '../../utils/regexp_parser';
 
 export type DocumentCachingOptions = {
-  allowList?: Array<string>;
-  denyList?: Array<string>;
+  allowList?: Array<RegExp>;
+  denyList?: Array<RegExp>;
   timeoutSeconds?: Number;
 };
 
@@ -51,13 +50,9 @@ export function documentCaching(
 
   // create regexp Array from parsing the string array
   if (documentCachingOptions.allowList) {
-    navigationPreloadOptions.whitelist = documentCachingOptions.allowList
-      .map(re => regexpParse(re))
-      .filter(el => el !== null) as Array<RegExp>;
+    navigationPreloadOptions.whitelist = documentCachingOptions.allowList;
   } else if (documentCachingOptions.denyList) {
-    navigationPreloadOptions.blacklist = documentCachingOptions.denyList
-      .map(re => regexpParse(re))
-      .filter(el => el !== null) as Array<RegExp>;
+    navigationPreloadOptions.blacklist = documentCachingOptions.denyList;
   }
 
   router.registerRoute(

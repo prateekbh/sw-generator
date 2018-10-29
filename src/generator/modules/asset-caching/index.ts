@@ -9,11 +9,10 @@ import {
 //import { regexpParse } from '../../utils/regexp_parser';
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
-import { regexpParse } from '../../utils/regexp_parser';
 
 export type AssetCachingOptions = Array<{
-  regexp: string;
-  cachingStrategy: string;
+  regexp: RegExp;
+  cachingStrategy: 'NETWORK_FIRST' | 'CACHE_FIRST' | 'STALE_WHILE_REVALIDATE';
 }>;
 
 class AssetCachingPlugin extends Plugin {
@@ -67,9 +66,6 @@ export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
         break;
     }
 
-    router.registerRoute(
-      regexpParse(assetCachingOption.regexp),
-      cachingStrategy,
-    );
+    router.registerRoute(assetCachingOption.regexp, cachingStrategy);
   });
 }
