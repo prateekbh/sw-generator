@@ -18,6 +18,9 @@
 
 export function serializeObject(obj: any) {
   let stringifiedValue = [];
+  if (Array.isArray(obj)) {
+    return getStringForObj(obj);
+  }
   for (const key in obj) {
     stringifiedValue.push(`${key}: ${getStringForObj(obj[key])}`);
   }

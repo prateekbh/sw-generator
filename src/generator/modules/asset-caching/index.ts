@@ -6,25 +6,36 @@ import {
   StaleWhileRevalidate,
   // @ts-ignore
 } from 'workbox-strategies';
-//import { regexpParse } from '../../utils/regexp_parser';
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
 
 export type AssetCachingOptions = Array<{
   regexp: RegExp;
   cachingStrategy: 'NETWORK_FIRST' | 'CACHE_FIRST' | 'STALE_WHILE_REVALIDATE';
+  denyList?: Array<RegExp>;
 }>;
 
 class AssetCachingPlugin extends Plugin {
-  constructor(config: any) {
+  denyList_?: Array<RegExp>;
+
+  constructor(config: any, denyList?: Array<RegExp>) {
     super(config);
+    this.denyList_ = denyList;
   }
   async cacheWillUpdate({
+    request,
     response,
   }: {
+    request: Request;
     response: Response;
   }): Promise<Response | null> {
     let returnedResponse: Response | null = null;
+    this.denyList_ &&
+      this.denyList_.forEach(deniedUrlRegExp => {
+        if (deniedUrlRegExp.test(request.url)) {
+          return null;
+        }
+      });
     if (super.cacheWillUpdate) {
       returnedResponse = await super.cacheWillUpdate({ response });
     } else {

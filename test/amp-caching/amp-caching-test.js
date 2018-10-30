@@ -10,7 +10,6 @@ const unlink = promisify(fs.unlink);
 describe('AMP Caching Module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
-  this.timeout(7000);
 
   before(async () => {
     const generatedSW = await buildSW({});

@@ -27,7 +27,7 @@ export async function buildSW(
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
-  npmRun.sync(`tsc -p ./src/tsconfig.json --outDir lib`);
+  npmRun.sync(`tsc -p ./src/tsconfig.json`);
 
   const replacePatterns = [
     {

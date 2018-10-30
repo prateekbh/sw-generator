@@ -79,10 +79,12 @@ function runMochaForBrowser(driver) {
     mocha.addFile(
       join(__dirname, 'document-caching', 'document-caching-test.js'),
     );
+    mocha.addFile(join(__dirname, 'asset-caching', 'asset-caching-test.js'));
     mocha.addFile(join(__dirname, 'builder', 'serialize-test.js'));
   }
   // Run the tests.
   mocha
+    .timeout(7000)
     .run(function(failures) {
       process.exitCode = failures ? -1 : 0; // exit with non-zero status if there were failures
     })
