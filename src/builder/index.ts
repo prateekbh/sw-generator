@@ -14,10 +14,12 @@ import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 //import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
-export async function buildSW({
-  documentCachingOptions,
-  assetCachingOptions,
-}: ServiceWorkerConfiguration) {
+export async function buildSW(
+  {
+    documentCachingOptions,
+    assetCachingOptions,
+  }: ServiceWorkerConfiguration = { documentCachingOptions: {} },
+) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
