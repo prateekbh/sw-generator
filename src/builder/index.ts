@@ -18,7 +18,10 @@ export async function buildSW(
   {
     documentCachingOptions,
     assetCachingOptions,
-  }: ServiceWorkerConfiguration = { documentCachingOptions: {} },
+  }: ServiceWorkerConfiguration = {
+    documentCachingOptions: {},
+    assetCachingOptions: undefined,
+  },
 ) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
@@ -50,19 +53,10 @@ export async function buildSW(
     });
   }
 
-  const babelConfig = getBabelConfig();
-
-  if (!assetCachingOptions || assetCachingOptions.length === 0) {
-    console.log('removing cacheAssets');
-    babelConfig.plugins.push([
-      'filter-imports',
-      {
-        imports: {
-          './asset-caching/index': ['cacheAssets'],
-        },
-      },
-    ]);
-  }
+  const babelConfig = getBabelConfig({
+    documentCachingOptions,
+    assetCachingOptions,
+  });
 
   // rollup the files in the tempdir
   const bundle = await rollup({

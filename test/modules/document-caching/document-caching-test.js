@@ -1,8 +1,8 @@
-import { buildSW } from '../../lib/builder/index';
+import { buildSW } from '../../../lib/builder/index';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { join } from 'path';
-import { performCleanupAndWaitForSWActivation } from '../test-utils/sw-installer';
+import { performCleanupAndWaitForSWActivation } from '../../test-utils/sw-installer';
 
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
