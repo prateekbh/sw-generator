@@ -12,7 +12,6 @@ export default function({ assetCachingOptions }: ServiceWorkerConfiguration) {
   };
 
   if (!assetCachingOptions || assetCachingOptions.length === 0) {
-    console.log('removing cacheAssets');
     babelConfig.plugins.push([
       'filter-imports',
       {

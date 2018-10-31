@@ -60,7 +60,7 @@ export async function buildSW(
 
   // rollup the files in the tempdir
   const bundle = await rollup({
-    input: join('lib', 'generator', 'index.js'),
+    input: join('lib', 'modules', 'index.js'),
     plugins: [
       resolve({}),
       babel(babelConfig),
