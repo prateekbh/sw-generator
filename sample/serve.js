@@ -12,12 +12,6 @@ const writeFile = promisify(fs.writeFile);
     documentCachingOptions: {
       denyList: [/menu.amp.html/],
     },
-    assetCachingOptions: [
-      {
-        regexp: /.(png|jpg)$/,
-        cachingStrategy: 'CACHE_FIRST'
-      }
-    ]
   });
   await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
   const serveDir = new nodeStatic.Server('./sample');

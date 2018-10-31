@@ -11,6 +11,7 @@ export type DocumentCachingOptions = {
   allowList?: Array<RegExp>;
   denyList?: Array<RegExp>;
   timeoutSeconds?: Number;
+  maxDocumentsInCache?: Number;
 };
 
 const cacheName = 'AMP-PUBLISHER-CACHE';
@@ -45,7 +46,10 @@ class AmpDocumentCachablePlugin extends Plugin {
 }
 
 export function documentCaching(
-  documentCachingOptions: DocumentCachingOptions,
+  documentCachingOptions: DocumentCachingOptions = {
+    maxDocumentsInCache: 10,
+    timeoutSeconds: 3,
+  },
 ): void {
   enableNagigationPreload();
   const navigationPreloadOptions: {
@@ -60,16 +64,32 @@ export function documentCaching(
     navigationPreloadOptions.blacklist = documentCachingOptions.denyList;
   }
 
+  if (
+    documentCachingOptions.timeoutSeconds &&
+    documentCachingOptions.timeoutSeconds > 5
+  ) {
+    // documentCachingOptions.timeoutSeconds more than 5s will hurt the UX as it'll keep waiting on the network.
+    documentCachingOptions.timeoutSeconds = 5;
+  }
+
+  if (
+    documentCachingOptions.maxDocumentsInCache &&
+    documentCachingOptions.maxDocumentsInCache > 10
+  ) {
+    // we should not allow more than 10 documents in cache as it'll quickly eat up client's cache.
+    documentCachingOptions.maxDocumentsInCache = 10;
+  }
+
   router.registerRoute(
     new NavigationRoute(
       new NetworkFirst({
         cacheName,
         plugins: [
           new AmpDocumentCachablePlugin({
-            maxEntries: 10,
+            maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
           }),
         ],
-        networkTimeoutSeconds: documentCachingOptions.timeoutSeconds || 2,
+        networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,
       }),
       navigationPreloadOptions,
     ),

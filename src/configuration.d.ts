@@ -3,5 +3,5 @@ import { AssetCachingOptions } from './modules/asset-caching';
 
 export interface ServiceWorkerConfiguration {
   documentCachingOptions: DocumentCachingOptions;
-  assetCachingOptions: AssetCachingOptions;
+  assetCachingOptions?: AssetCachingOptions;
 }

@@ -1,19 +1,13 @@
-import {
-  ampAssetsCaching,
-  listenForFetchedScripts,
-} from './modules/amp-caching/index';
+import { ampAssetsCaching, listenForFetchedScripts } from './amp-caching/index';
 import {
   documentCaching,
   cacheAMPDocument,
   DocumentCachingOptions,
-} from './modules/document-caching/index';
-import {
-  cacheAssets,
-  AssetCachingOptions,
-} from './modules/asset-caching/index';
+} from './document-caching/index';
+import { cacheAssets, AssetCachingOptions } from './asset-caching/index';
 
 /**
- * These config are replaced by a rollup plugin
+ * These config are replaced by a rollup plugin during the build process.
  */
 const __REPLACE_CONFIG_documentCachingOptions: DocumentCachingOptions = {};
 const __REPLACE_CONFIG_assetCachingOptions: AssetCachingOptions = [];
@@ -30,6 +24,11 @@ ampAssetsCaching();
 listenForFetchedScripts();
 documentCaching(config.documentCachingOptions);
 
+/**
+ * This if condition is to indicate that this module is optional in nature and might never execute.
+ * In reality if the options are actually null, we remove the import and the respective code with
+ * babel-filter-imports
+ */
 if (config.assetCachingOptions && config.assetCachingOptions.length > 0) {
   cacheAssets(config.assetCachingOptions);
 }

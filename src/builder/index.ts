@@ -1,7 +1,5 @@
 import { join } from 'path';
 import { rollup } from 'rollup';
-import { DocumentCachingOptions } from '../generator/modules/document-caching';
-import { AssetCachingOptions } from '../generator/modules/asset-caching';
 import getBabelConfig from './babel';
 
 // @ts-ignore
@@ -13,17 +11,13 @@ import resolve from 'rollup-plugin-node-resolve';
 // @ts-ignore
 import babel from 'rollup-plugin-babel';
 import { serializeObject } from './serialize';
+import { ServiceWorkerConfiguration } from '../configuration';
 //import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
-export async function buildSW(
-  {
-    documentCachingOptions,
-    assetCachingOptions,
-  }: {
-    documentCachingOptions: DocumentCachingOptions | null;
-    assetCachingOptions: AssetCachingOptions | null;
-  } = { documentCachingOptions: null, assetCachingOptions: null },
-) {
+export async function buildSW({
+  documentCachingOptions,
+  assetCachingOptions,
+}: ServiceWorkerConfiguration) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
   // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
   // Until then, use npm to transpile Typescript into a temp directory.
@@ -57,11 +51,12 @@ export async function buildSW(
   const babelConfig = getBabelConfig();
 
   if (!assetCachingOptions || assetCachingOptions.length === 0) {
+    console.log('removing cacheAssets');
     babelConfig.plugins.push([
       'filter-imports',
       {
         imports: {
-          './modules/asset-caching/index': ['cacheAssets'],
+          './asset-caching/index': ['cacheAssets'],
         },
       },
     ]);
@@ -71,11 +66,11 @@ export async function buildSW(
   const bundle = await rollup({
     input: join('lib', 'generator', 'index.js'),
     plugins: [
+      resolve({}),
+      babel(babelConfig),
       replace({
         patterns: replacePatterns,
       }),
-      resolve({}),
-      babel(babelConfig),
       /* TODO: uncomment this after https://github.com/ampproject/rollup-plugin-closure-compiler/issues/92
       * is resolved
       */

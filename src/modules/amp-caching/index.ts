@@ -4,7 +4,7 @@ import router from 'workbox-routing';
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
-import { FluxStandardAction } from '../../flux-standard-actions';
+import { FluxStandardAction } from '../flux-standard-actions';
 
 const VERSIONED_ASSETS_RE = /^https:\/\/cdn.ampproject.org\/rtv\/\d*\//;
 const UNVERSIONED_RUNTIME_RE = /^https:\/\/cdn.ampproject.org\/\w*(-\w*)?.js/;
