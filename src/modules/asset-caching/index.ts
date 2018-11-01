@@ -61,6 +61,7 @@ export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
       plugins: [
         new AssetCachingPlugin({
           maxEntries: 25,
+          denyList: assetCachingOption.denyList,
         }),
       ],
     };

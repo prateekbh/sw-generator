@@ -75,11 +75,20 @@ function runMochaForBrowser(driver) {
     console.log(argv['testFile']);
     mocha.addFile(join(__dirname, argv['testFile']));
   } else {
-    mocha.addFile(join(__dirname, 'amp-caching', 'amp-caching-test.js'));
     mocha.addFile(
-      join(__dirname, 'document-caching', 'document-caching-test.js'),
+      join(__dirname, 'modules', 'amp-caching', 'amp-caching-test.js'),
     );
-    mocha.addFile(join(__dirname, 'asset-caching', 'asset-caching-test.js'));
+    mocha.addFile(
+      join(
+        __dirname,
+        'modules',
+        'document-caching',
+        'document-caching-test.js',
+      ),
+    );
+    mocha.addFile(
+      join(__dirname, 'modules', 'asset-caching', 'asset-caching-test.js'),
+    );
     mocha.addFile(join(__dirname, 'builder', 'serialize-test.js'));
   }
   // Run the tests.
