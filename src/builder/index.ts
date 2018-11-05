@@ -34,10 +34,12 @@ export async function buildSW(
   {
     documentCachingOptions,
     assetCachingOptions,
+    linkPrefetchEnabled,
     mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
     assetCachingOptions: undefined,
+    linkPrefetchEnabled: false,
     mode: 'production',
   },
 ) {
@@ -49,7 +51,7 @@ export async function buildSW(
   const replacePatterns = [
     {
       test: 'process.env.NODE_ENV',
-      replace: `'${mode}'`,
+      replace: `'${mode || 'production'}'`,
     },
   ];
 
@@ -68,6 +70,13 @@ export async function buildSW(
       replace: `__REPLACE_CONFIG_assetCachingOptions = ${serializeObject(
         assetCachingOptions,
       )}`,
+    });
+  }
+
+  if (linkPrefetchEnabled) {
+    replacePatterns.push({
+      test: '__REPLACE_CONFIG_isLinkPrefetchEnabled = false',
+      replace: `__REPLACE_CONFIG_isLinkPrefetchEnabled = ${linkPrefetchEnabled}`,
     });
   }
 

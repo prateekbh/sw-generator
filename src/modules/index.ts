@@ -28,28 +28,28 @@ import { listenForLinkPrefetches } from './link-prefetch';
  */
 const __REPLACE_CONFIG_documentCachingOptions: DocumentCachingOptions = {};
 const __REPLACE_CONFIG_assetCachingOptions: AssetCachingOptions = [];
+const __REPLACE_CONFIG_isLinkPrefetchEnabled: boolean = false;
 
-const config: {
-  documentCachingOptions: DocumentCachingOptions;
-  assetCachingOptions: AssetCachingOptions;
-} = {
-  documentCachingOptions: __REPLACE_CONFIG_documentCachingOptions,
-  assetCachingOptions: __REPLACE_CONFIG_assetCachingOptions,
-};
-
-// Initialize all modules
+// Initialize all required modules.
 ampAssetsCaching();
 listenForFetchedScripts();
-documentCaching(config.documentCachingOptions);
-listenForLinkPrefetches();
+documentCaching(__REPLACE_CONFIG_documentCachingOptions);
 
 /**
  * This if condition is to indicate that this module is optional in nature and might never execute.
  * In reality if the options are actually null, we remove the import and the respective code with
  * babel-filter-imports
  */
-if (config.assetCachingOptions && config.assetCachingOptions.length > 0) {
-  cacheAssets(config.assetCachingOptions);
+if (
+  __REPLACE_CONFIG_assetCachingOptions &&
+  __REPLACE_CONFIG_assetCachingOptions.length > 0
+) {
+  cacheAssets(__REPLACE_CONFIG_assetCachingOptions);
+}
+
+// Same vanity check for readibility as mentioned above.
+if (__REPLACE_CONFIG_isLinkPrefetchEnabled) {
+  listenForLinkPrefetches();
 }
 
 // Taking over the document

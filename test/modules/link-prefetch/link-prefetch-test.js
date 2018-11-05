@@ -22,9 +22,9 @@ import { performCleanupAndWaitForSWActivation } from '../../test-utils/sw-instal
 
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
-const cacheName = 'AMP-PUBLISHER-CACHE';
+const cacheName = 'AMP-PREFETCHED-LINKS';
 
-describe('Document caching module', function() {
+describe('Link prefetch module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'document-caching-sw.js');
 

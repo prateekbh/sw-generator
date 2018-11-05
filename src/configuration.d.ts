@@ -20,5 +20,6 @@ import { AssetCachingOptions } from './modules/asset-caching';
 export interface ServiceWorkerConfiguration {
   documentCachingOptions: DocumentCachingOptions;
   assetCachingOptions?: AssetCachingOptions;
+  linkPrefetchEnabled?: boolean;
   mode?: 'local' | 'production';
 }
