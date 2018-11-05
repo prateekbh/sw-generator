@@ -21,6 +21,7 @@ import {
   DocumentCachingOptions,
 } from './document-caching/index';
 import { cacheAssets, AssetCachingOptions } from './asset-caching/index';
+import { listenForLinkPrefetches } from './link-prefetch';
 
 /**
  * These config are replaced by a rollup plugin during the build process.
@@ -36,9 +37,11 @@ const config: {
   assetCachingOptions: __REPLACE_CONFIG_assetCachingOptions,
 };
 
+// Initialize all modules
 ampAssetsCaching();
 listenForFetchedScripts();
 documentCaching(config.documentCachingOptions);
+listenForLinkPrefetches();
 
 /**
  * This if condition is to indicate that this module is optional in nature and might never execute.
@@ -49,6 +52,8 @@ if (config.assetCachingOptions && config.assetCachingOptions.length > 0) {
   cacheAssets(config.assetCachingOptions);
 }
 
+// Taking over the document
+
 self.addEventListener('install', function(e: ExtendableEvent) {
   const { skipWaiting } = self as ServiceWorkerGlobalScope;
   e.waitUntil(skipWaiting());
@@ -58,6 +63,7 @@ self.addEventListener('activate', async (e: ExtendableEvent) => {
   const { clients } = self as ServiceWorkerGlobalScope;
   e.waitUntil(
     clients.claim().then(async () => {
+      // Cache current document if its AMP.
       const windowClients = await clients.matchAll({ type: 'window' });
       return Promise.all(cacheAMPDocument(windowClients));
     }),

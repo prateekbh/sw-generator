@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "transpile": "tsc -p ./src/tsconfig.json --outDir lib",
+    "transpile": "tsc -p ./src/tsconfig.json",
     "pretest": "npm run transpile",
     "test": "node -r esm ./test/index.js",
     "start": "node -r esm ./index.js",

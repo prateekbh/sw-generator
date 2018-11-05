@@ -72,7 +72,7 @@ export function ampAssetsCaching() {
 export function listenForFetchedScripts(): void {
   self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
     const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
-    if (data.type === 'FIRST-VISIT-CACHING' && data.payload) {
+    if (data.type === 'AMP__FIRST-VISIT-CACHING' && data.payload) {
       messageEvent.waitUntil(cachePreRequestedScripts(data.payload));
     }
   });
@@ -92,7 +92,7 @@ async function cachePreRequestedScripts(scripts: Array<string>) {
     }
   });
   const unversionedCache = await caches.open(UNVERSIONED_CACHE_NAME);
-  unversionedCache.addAll(unversionedScripts);
+  await unversionedCache.addAll(unversionedScripts);
   const versionedCache = await caches.open(VERSIONED_CACHE_NAME);
-  versionedCache.addAll(versionedScripts);
+  await versionedCache.addAll(versionedScripts);
 }

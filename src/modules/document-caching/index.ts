@@ -28,6 +28,7 @@ export type DocumentCachingOptions = {
   denyList?: Array<RegExp>;
   timeoutSeconds?: Number;
   maxDocumentsInCache?: Number;
+  maxAgeSecondsforDocumentsInCache?: Number;
 };
 
 const cacheName = 'AMP-PUBLISHER-CACHE';
@@ -64,6 +65,7 @@ class AmpDocumentCachablePlugin extends Plugin {
 export function documentCaching(
   documentCachingOptions: DocumentCachingOptions = {
     maxDocumentsInCache: 10,
+    maxAgeSecondsforDocumentsInCache: 5 * 24 * 60 * 60,
     timeoutSeconds: 3,
   },
 ): void {
@@ -103,6 +105,9 @@ export function documentCaching(
         plugins: [
           new AmpDocumentCachablePlugin({
             maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
+            maxAgeSeconds:
+              documentCachingOptions.maxAgeSecondsforDocumentsInCache ||
+              5 * 24 * 60 * 60,
           }),
         ],
         networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,

@@ -34,9 +34,11 @@ export async function buildSW(
   {
     documentCachingOptions,
     assetCachingOptions,
+    mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
     assetCachingOptions: undefined,
+    mode: 'production',
   },
 ) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
@@ -47,7 +49,7 @@ export async function buildSW(
   const replacePatterns = [
     {
       test: 'process.env.NODE_ENV',
-      replace: "'production'",
+      replace: `'${mode}'`,
     },
   ];
 
