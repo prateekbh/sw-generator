@@ -18,59 +18,17 @@
 import router, { NavigationRoute } from 'workbox-routing';
 // @ts-ignore
 import { CacheFirst } from 'workbox-strategies';
-// @ts-ignore
-import { Plugin } from 'workbox-cache-expiration';
 import { FluxStandardAction } from '../flux-standard-actions';
+import AmpNavigationRoute from '../document-caching/AmpNavigationRoute';
+import { AmpPrefetchPlugin } from './AmpPrefetchPlugin';
 
 const cacheName = 'AMP-PREFETCHED-LINKS';
+let navigationRoute_: AmpNavigationRoute;
 
-class AmpPrefetchPlugin extends Plugin {
-  constructor(config: any) {
-    super(config);
-  }
-  async cacheWillUpdate({
-    request,
-  }: {
-    request: Request;
-  }): Promise<Response | null> {
-    return null;
-  }
-  async cachedResponseWillBeUsed({
-    cacheName,
-    request,
-    cachedResponse,
-  }: {
-    cacheName: string;
-    request: Request;
-    cachedResponse: Response;
-  }): Promise<Response | null> {
-    const response = await super.cachedResponseWillBeUsed({
-      cacheName,
-      cachedResponse,
-    });
-    const cache = await caches.open(cacheName);
-    // Dont wait on actual delete operation.
-    cache.delete(request);
-    return response;
-  }
-}
-
-export function listenForLinkPrefetches() {
-  router.registerRoute(
-    new NavigationRoute(
-      new CacheFirst({
-        cacheName,
-        plugins: [
-          new AmpPrefetchPlugin({
-            maxEntries: 5,
-            maxAgeSeconds: 5 * 60,
-          }),
-        ],
-        networkTimeoutSeconds: 1,
-      }),
-    ),
-  );
-
+export async function listenForLinkPrefetches(
+  navigationRoute: AmpNavigationRoute,
+) {
+  navigationRoute_ = navigationRoute;
   self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
     const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
     if (data.type === 'AMP__LINK_PREFETCH' && data.payload) {
@@ -79,7 +37,74 @@ export function listenForLinkPrefetches() {
   });
 }
 
-async function cachePrefetchLinks(links: Array<string>) {
+export async function registerPrefetchLinks() {
+  // Read all prefetched links and add it to deny list.
   const cache = await caches.open(cacheName);
-  await cache.addAll(links);
+  const linksRegExps: Array<RegExp> = [];
+  (await cache.keys()).forEach(request => {
+    let url = request.url;
+    linksRegExps.push(convertUrlToRegExp(cleanHostInfoFromUrl(url)));
+  });
+
+  addRouteHandler(linksRegExps);
+}
+
+function addRouteHandler(linksRegExps: Array<RegExp>) {
+  linksRegExps.forEach(link => {
+    navigationRoute_.addDeniedUrls(link);
+    router.registerRoute(
+      link,
+      new CacheFirst({
+        cacheName,
+        plugins: [
+          new AmpPrefetchPlugin({
+            maxEntries: 5,
+            maxAgeSeconds: 5 * 60,
+            postDelete: (url: string) => {
+              url = url
+                .replace(/https?:\/\//, '')
+                .replace(self.location.host, '');
+              const linkRE = convertUrlToRegExp(url);
+              navigationRoute_.removeDeniedUrls(linkRE);
+            },
+          }),
+        ],
+        networkTimeoutSeconds: 0.5,
+      }),
+    );
+  });
+}
+
+async function cachePrefetchLinks(links: Array<string>) {
+  // allow links to same domain only.
+  const allowedLinks = links.filter(link => {
+    const matches = link.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+    const domain = matches && matches[1];
+    // only allow null/ same domain URLs
+    return domain === null || domain === self.location.host;
+  });
+  // TODO: add logic to only allow URLs within SW scope.
+  if (allowedLinks && allowedLinks.length > 0) {
+    const cache = await caches.open(cacheName);
+    await cache.addAll(allowedLinks);
+    const linkRegExps = allowedLinks.map(link =>
+      convertUrlToRegExp(cleanHostInfoFromUrl(link)),
+    );
+    addRouteHandler(linkRegExps);
+  }
+}
+
+function convertUrlToRegExp(link: string): RegExp {
+  const regExp = new RegExp(
+    link
+      .replace(/\//g, '\\/')
+      .replace(/\?/g, '\\?')
+      .replace(/\+/g, '\\+'),
+  );
+  return regExp;
+}
+
+function cleanHostInfoFromUrl(url: string): string {
+  // remove host as the URLs are to same domain.
+  return url.replace(/https?:\/\//, '').replace(self.location.host, '');
 }

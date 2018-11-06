@@ -33,7 +33,9 @@ const __REPLACE_CONFIG_isLinkPrefetchEnabled: boolean = false;
 // Initialize all required modules.
 ampAssetsCaching();
 listenForFetchedScripts();
-documentCaching(__REPLACE_CONFIG_documentCachingOptions);
+const navigationRoute = documentCaching(
+  __REPLACE_CONFIG_documentCachingOptions,
+);
 
 /**
  * This if condition is to indicate that this module is optional in nature and might never execute.
@@ -49,7 +51,7 @@ if (
 
 // Same vanity check for readibility as mentioned above.
 if (__REPLACE_CONFIG_isLinkPrefetchEnabled) {
-  listenForLinkPrefetches();
+  listenForLinkPrefetches(navigationRoute);
 }
 
 // Taking over the document

@@ -9,9 +9,6 @@ const writeFile = promisify(fs.writeFile);
 
 (async function(){
   const serviceWorker = await buildSW({
-    documentCachingOptions: {
-      denyList: [/menu.amp.html/],
-    },
     assetCachingOptions: [
       {
         cachingStrategy: 'NETWORK_FIRST',
@@ -19,6 +16,7 @@ const writeFile = promisify(fs.writeFile);
       }
     ],
     linkPrefetchEnabled: true,
+    mode: 'local'
   });
   await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
   const serveDir = new nodeStatic.Server('./sample');
