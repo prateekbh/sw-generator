@@ -9,7 +9,7 @@
   <script>
     async function executeScript(fn, cb, ...args) {
       try {
-        await fn(...args);
+        await fn(cb, ...args);
         cb()
       } catch (e) {
         cb(e.message);

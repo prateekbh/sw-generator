@@ -99,14 +99,80 @@ describe('Link prefetch module', function() {
   });
 
   it('should respond with CacheFirst for the prefetched request', async () => {
-    expect(false).to.be.equal(true);
+    await addDummyResponseToCache(driver);
+    const response = await driver.executeAsyncScript(async cb => {
+      executeScript(async cb => {
+        const url = '/test/alternate.amp.html';
+        const fetchedResponse = await fetch(url);
+        cb(await fetchedResponse.text());
+      }, cb);
+    });
+    // Expecting the dummy response added above.
+    expect(response).to.be.equal('hello world');
   });
 
   it('should respond for the prefetched request only for 1 request', async () => {
-    expect(false).to.be.equal(true);
+    await addDummyResponseToCache(driver);
+    const response = await driver.executeAsyncScript(async cb => {
+      executeScript(async cb => {
+        const url = '/test/alternate.amp.html';
+        // first request
+        await fetch(url);
+        // second request
+        const fetchedResponse = await fetch(url);
+        cb(await fetchedResponse.text());
+      }, cb);
+    });
+    // Expecting the dummy response added above.
+    expect(response).to.not.be.equal('hello world');
   });
 
   it('should respond for the prefetched request only within configured time', async () => {
-    expect(false).to.be.equal(true);
+    await addDummyResponseToCache(driver);
+    const response = await driver.executeAsyncScript(async cb => {
+      executeScript(async cb => {
+        const url = '/test/alternate.amp.html';
+        const cache = await caches.open(cacheName);
+        const timeDelta = 6 * 60 * 1000;
+        // Adding a dummy response.
+        await cache.put(
+          new Request(url),
+          new Response('hello world', {
+            headers: {
+              date: new Date(Date.now() - timeDelta),
+            },
+          }),
+        );
+        const fetchedResponse = await fetch(url);
+        cb(await fetchedResponse.text());
+      }, cb);
+    });
+    // Expecting the dummy response added above.
+    expect(response).to.not.be.equal('hello world');
   });
 });
+
+async function addDummyResponseToCache(driver) {
+  return await driver.executeAsyncScript(async (url, cb) => {
+    executeScript(
+      async cb => {
+        const cacheName = window.__cacheName;
+        const url = '/test/alternate.amp.html';
+        // This'll add an entry to denyList of navigation preload.
+        navigator.serviceWorker.controller.postMessage(
+          JSON.stringify({
+            type: 'AMP__LINK_PREFETCH',
+            payload: [url],
+          }),
+        );
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const cache = await caches.open(cacheName);
+        // Adding a dummy response.
+        await cache.put(new Request(url), new Response('hello world'));
+        cb(url);
+      },
+      url,
+      cb,
+    );
+  });
+}
