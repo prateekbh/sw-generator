@@ -16,10 +16,11 @@
 
 import { DocumentCachingOptions } from './modules/document-caching';
 import { AssetCachingOptions } from './modules/asset-caching';
+import { LinkPrefetchOptions } from './modules/link-prefetch';
 
 export interface ServiceWorkerConfiguration {
   documentCachingOptions: DocumentCachingOptions;
   assetCachingOptions?: AssetCachingOptions;
-  linkPrefetchEnabled?: boolean;
+  linkPrefetchOptions?: LinkPrefetchOptions;
   mode?: 'local' | 'production';
 }

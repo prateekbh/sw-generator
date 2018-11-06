@@ -34,12 +34,12 @@ export async function buildSW(
   {
     documentCachingOptions,
     assetCachingOptions,
-    linkPrefetchEnabled,
+    linkPrefetchOptions,
     mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
     assetCachingOptions: undefined,
-    linkPrefetchEnabled: false,
+    linkPrefetchOptions: undefined,
     mode: 'production',
   },
 ) {
@@ -73,10 +73,12 @@ export async function buildSW(
     });
   }
 
-  if (linkPrefetchEnabled) {
+  if (linkPrefetchOptions) {
     replacePatterns.push({
-      test: '__REPLACE_CONFIG_isLinkPrefetchEnabled = false',
-      replace: `__REPLACE_CONFIG_isLinkPrefetchEnabled = ${linkPrefetchEnabled}`,
+      test: '__REPLACE_CONFIG_isLinkPrefetchOptions = undefined',
+      replace: `__REPLACE_CONFIG_isLinkPrefetchOptions = ${serializeObject(
+        linkPrefetchOptions,
+      )}`,
     });
   }
 

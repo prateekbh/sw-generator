@@ -22,13 +22,19 @@ import { FluxStandardAction } from '../flux-standard-actions';
 import AmpNavigationRoute from '../document-caching/AmpNavigationRoute';
 import { AmpPrefetchPlugin } from './AmpPrefetchPlugin';
 
+export type LinkPrefetchOptions = {
+  maxAgeSecondsInCache: Number;
+};
+
 const cacheName = 'AMP-PREFETCHED-LINKS';
 let navigationRoute_: AmpNavigationRoute;
+let linkPrefetchOptions_: LinkPrefetchOptions | undefined;
 
-export async function listenForLinkPrefetches(
-  navigationRoute: AmpNavigationRoute,
-) {
-  navigationRoute_ = navigationRoute;
+/**
+ * Listens for post messaged links to be prefetch, in case
+ * the browser doesnt support <link rel=prefetch.
+ */
+export async function listenForLinkPrefetches() {
   self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
     const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
     if (data.type === 'AMP__LINK_PREFETCH' && data.payload) {
@@ -37,7 +43,15 @@ export async function listenForLinkPrefetches(
   });
 }
 
-export async function registerPrefetchLinks() {
+/**
+ * Registers already prefeetched links to navigation-preload denyList.
+ */
+export async function registerPrefetchLinks(
+  navigationRoute: AmpNavigationRoute,
+  linkPrefetchOptions?: LinkPrefetchOptions,
+) {
+  linkPrefetchOptions_ = linkPrefetchOptions;
+  navigationRoute_ = navigationRoute;
   // Read all prefetched links and add it to deny list.
   const cache = await caches.open(cacheName);
   const linksRegExps: Array<RegExp> = [];
@@ -47,32 +61,6 @@ export async function registerPrefetchLinks() {
   });
 
   addRouteHandler(linksRegExps);
-}
-
-function addRouteHandler(linksRegExps: Array<RegExp>) {
-  linksRegExps.forEach(link => {
-    navigationRoute_.addDeniedUrls(link);
-    router.registerRoute(
-      link,
-      new CacheFirst({
-        cacheName,
-        plugins: [
-          new AmpPrefetchPlugin({
-            maxEntries: 5,
-            maxAgeSeconds: 5 * 60,
-            postDelete: (url: string) => {
-              url = url
-                .replace(/https?:\/\//, '')
-                .replace(self.location.host, '');
-              const linkRE = convertUrlToRegExp(url);
-              navigationRoute_.removeDeniedUrls(linkRE);
-            },
-          }),
-        ],
-        networkTimeoutSeconds: 0.5,
-      }),
-    );
-  });
 }
 
 async function cachePrefetchLinks(links: Array<string>) {
@@ -94,6 +82,37 @@ async function cachePrefetchLinks(links: Array<string>) {
   }
 }
 
+function addRouteHandler(linksRegExps: Array<RegExp>) {
+  let maxAgeSecondsInCache = linkPrefetchOptions_
+    ? linkPrefetchOptions_.maxAgeSecondsInCache
+    : 300;
+  // We have a hard upper limit to how long will the prefetcfhed documents live in the memory.
+  if (maxAgeSecondsInCache > 300) {
+    maxAgeSecondsInCache = 300;
+  }
+
+  linksRegExps.forEach(link => {
+    navigationRoute_.addDeniedUrls(link);
+    router.registerRoute(
+      link,
+      new CacheFirst({
+        cacheName,
+        plugins: [
+          new AmpPrefetchPlugin({
+            maxEntries: 10,
+            maxAgeSeconds: maxAgeSecondsInCache,
+            postDelete: (url: string) => {
+              const linkRE = convertUrlToRegExp(cleanHostInfoFromUrl(url));
+              navigationRoute_.removeDeniedUrls(linkRE);
+            },
+          }),
+        ],
+        networkTimeoutSeconds: 0.5,
+      }),
+    );
+  });
+}
+
 function convertUrlToRegExp(link: string): RegExp {
   const regExp = new RegExp(
     link
@@ -104,6 +123,7 @@ function convertUrlToRegExp(link: string): RegExp {
   return regExp;
 }
 
+// We dont cache any links from outside the same origin so its safe to clean the host info.
 function cleanHostInfoFromUrl(url: string): string {
   // remove host as the URLs are to same domain.
   return url.replace(/https?:\/\//, '').replace(self.location.host, '');

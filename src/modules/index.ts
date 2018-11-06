@@ -21,14 +21,20 @@ import {
   DocumentCachingOptions,
 } from './document-caching/index';
 import { cacheAssets, AssetCachingOptions } from './asset-caching/index';
-import { listenForLinkPrefetches } from './link-prefetch';
+import {
+  listenForLinkPrefetches,
+  LinkPrefetchOptions,
+  registerPrefetchLinks,
+} from './link-prefetch';
 
 /**
  * These config are replaced by a rollup plugin during the build process.
  */
 const __REPLACE_CONFIG_documentCachingOptions: DocumentCachingOptions = {};
 const __REPLACE_CONFIG_assetCachingOptions: AssetCachingOptions = [];
-const __REPLACE_CONFIG_isLinkPrefetchEnabled: boolean = false;
+const __REPLACE_CONFIG_isLinkPrefetchOptions:
+  | LinkPrefetchOptions
+  | undefined = undefined;
 
 // Initialize all required modules.
 ampAssetsCaching();
@@ -50,8 +56,12 @@ if (
 }
 
 // Same vanity check for readibility as mentioned above.
-if (__REPLACE_CONFIG_isLinkPrefetchEnabled) {
-  listenForLinkPrefetches(navigationRoute);
+if (__REPLACE_CONFIG_isLinkPrefetchOptions) {
+  registerPrefetchLinks(
+    navigationRoute,
+    __REPLACE_CONFIG_isLinkPrefetchOptions,
+  );
+  listenForLinkPrefetches();
 }
 
 // Taking over the document
