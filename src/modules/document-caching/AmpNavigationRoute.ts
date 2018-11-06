@@ -35,6 +35,8 @@ export default class AmpNavigationRoute extends NavigationRoute {
     this._blacklist.push(urlRegExp);
   }
   removeDeniedUrls(urlRegExp: RegExp): void {
-    this._blacklist.filter(re => re.toString() !== urlRegExp.toString());
+    this._blacklist = this._blacklist.filter(
+      re => re.toString() !== urlRegExp.toString(),
+    );
   }
 }
