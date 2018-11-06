@@ -75,7 +75,7 @@ describe('Link prefetch module', function() {
         const cacheName = window.__cacheName;
         navigator.serviceWorker.controller.postMessage(
           JSON.stringify({
-            type: 'AMP__LINK_PREFETCH',
+            type: 'AMP__LINK-PREFETCH',
             payload: [
               'http://localhost:6881/test/accordian.amp.html',
               '/test/alternate.amp.html',
@@ -161,7 +161,7 @@ async function addDummyResponseToCache(driver) {
         // This'll add an entry to denyList of navigation preload.
         navigator.serviceWorker.controller.postMessage(
           JSON.stringify({
-            type: 'AMP__LINK_PREFETCH',
+            type: 'AMP__LINK-PREFETCH',
             payload: [url],
           }),
         );

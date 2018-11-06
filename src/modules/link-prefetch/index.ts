@@ -37,7 +37,7 @@ let linkPrefetchOptions_: LinkPrefetchOptions | undefined;
 export async function listenForLinkPrefetches() {
   self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
     const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
-    if (data.type === 'AMP__LINK_PREFETCH' && data.payload) {
+    if (data.type === 'AMP__LINK-PREFETCH' && data.payload) {
       messageEvent.waitUntil(cachePrefetchLinks(data.payload));
     }
   });

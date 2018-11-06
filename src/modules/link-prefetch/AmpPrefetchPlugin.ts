@@ -28,6 +28,10 @@ export class AmpPrefetchPlugin extends Plugin {
   }: {
     request: Request;
   }): Promise<Response | null> {
+    /**
+     * Never cache anything, since its a prefetch module,
+     * the caching will actually be dome by the postMessage listener.
+     */
     return null;
   }
   async cachedResponseWillBeUsed({
@@ -45,7 +49,11 @@ export class AmpPrefetchPlugin extends Plugin {
     });
     const cache = await caches.open(cacheName);
     const url = request.url;
-    // Dont wait on actual delete operation.
+    /**
+     * Delete the url from cache, as the prefetch should
+     * only work for one request,
+     * but dont wait on actual delete operation.
+     */
     cache.delete(request).then(() => {
       if (this._config.postDelete) {
         this._config.postDelete(url);
