@@ -161,7 +161,7 @@ describe('AMP caching module', function() {
         try {
           navigator.serviceWorker.controller.postMessage(
             JSON.stringify({
-              type: 'FIRST-VISIT-CACHING',
+              type: 'AMP__FIRST-VISIT-CACHING',
               payload,
             }),
           );
