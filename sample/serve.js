@@ -14,7 +14,7 @@ const writeFile = promisify(fs.writeFile);
     },
   });
   await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
-  await writeFile(path.join(__dirname, 'Beck &amp; Galo', 'amp-sw.js'), serviceWorker);
+  await writeFile(path.join(__dirname, 'Menu', 'amp-sw.js'), serviceWorker);
   const serveDir = new nodeStatic.Server('./sample');
   http.createServer((request, response) => {
     request.addListener('end', function () {

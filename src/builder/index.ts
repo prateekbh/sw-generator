@@ -16,6 +16,8 @@
 
 import { join } from 'path';
 import { rollup } from 'rollup';
+import { serializeObject } from './serialize';
+import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
 
 // @ts-ignore
@@ -26,9 +28,8 @@ import replace from 'rollup-plugin-re';
 import resolve from 'rollup-plugin-node-resolve';
 // @ts-ignore
 import babel from 'rollup-plugin-babel';
-import { serializeObject } from './serialize';
-import { ServiceWorkerConfiguration } from '../configuration';
-//import compiler from '@ampproject/rollup-plugin-closure-compiler';
+// @ts-ignore
+const compiler = require('@ampproject/rollup-plugin-closure-compiler');
 
 export async function buildSW(
   {
@@ -96,13 +97,15 @@ export async function buildSW(
       replace({
         patterns: replacePatterns,
       }),
-      /* TODO: uncomment this after https://github.com/ampproject/rollup-plugin-closure-compiler/issues/92
-      * is resolved
-      */
-      // compiler({
-      //   compilation_level: 'ADVANCED',
-      //   jscomp_off: 'checkVars',
-      // }),
+      compiler(
+        {
+          compilation_level: 'ADVANCED',
+          jscomp_off: 'checkVars',
+        },
+        {
+          mangleReservedWords: ['Plugin'],
+        },
+      ),
     ],
   });
   const { code } = await bundle.generate({
