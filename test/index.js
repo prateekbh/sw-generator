@@ -21,9 +21,11 @@ import { expect } from 'chai';
 import { argv } from 'yargs';
 import http from 'http';
 import nodeStatic from 'node-static';
+import glob from 'glob-fs';
 
 const isLocalExecution = !!argv['local'];
 const serveDir = new nodeStatic.Server('./');
+const globfinder = glob();
 
 const server = http.createServer((request, response) => {
   request
@@ -87,26 +89,13 @@ function runMochaForBrowser(driver) {
   global.__AMPSW.driver = driver;
   global.expect = expect;
   const mocha = new Mocha();
-  if (argv['testFile']) {
-    console.log(argv['testFile']);
-    mocha.addFile(join(__dirname, argv['testFile']));
-  } else {
-    mocha.addFile(
-      join(__dirname, 'modules', 'amp-caching', 'amp-caching-test.js'),
-    );
-    mocha.addFile(
-      join(
-        __dirname,
-        'modules',
-        'document-caching',
-        'document-caching-test.js',
-      ),
-    );
-    mocha.addFile(
-      join(__dirname, 'modules', 'asset-caching', 'asset-caching-test.js'),
-    );
-    mocha.addFile(join(__dirname, 'builder', 'serialize-test.js'));
-  }
+  const testFiles = globfinder.readdirSync(
+    argv['files'] || 'test/**/*-test.js',
+  );
+  testFiles.forEach(testFile => {
+    console.log(`Testing ${testFile}`);
+    mocha.addFile(testFile);
+  });
   // Run the tests.
   mocha
     .timeout(7000)

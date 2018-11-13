@@ -24,7 +24,7 @@ declare type BabelConfig = {
 export default function({ assetCachingOptions }: ServiceWorkerConfiguration) {
   const babelConfig: BabelConfig = {
     babelrc: false,
-    plugins: ['@babel/plugin-transform-async-to-generator'],
+    plugins: [],
   };
 
   if (!assetCachingOptions || assetCachingOptions.length === 0) {

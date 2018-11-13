@@ -6,67 +6,14 @@
 <body>
   <script src="/test/test-utils/wait-for-sw-state.js"></script>
   <script src="/test/test-utils/sw-test-cleanup.js"></script>
-  <!-- IDB keyval-->
-  <script src="https://unpkg.com/idb@2.1.3/lib/idb.js" ></script>
   <script>
-    function getKeyValStore(storeName) {
-      const dbPromise = idb.open(storeName, 2, upgradeDB => {
-        upgradeDB.createObjectStore(storeName);
-      });
-
-      return idbKeyval = {
-        get(key) {
-          return dbPromise.then(db => {
-            return db.transaction(storeName)
-              .objectStore(storeName).get(key);
-          });
-        },
-        set(key, val) {
-          return dbPromise.then(db => {
-            const tx = db.transaction(storeName, 'readwrite');
-            tx.objectStore(storeName).put(val, key);
-            return tx.complete;
-          });
-        },
-        put(putObj) {
-          return dbPromise.then(db => {
-            const tx = db.transaction(storeName, 'readwrite');
-            tx.objectStore(storeName).put(putObj);
-            return tx.complete;
-          });
-        },
-        delete(key) {
-          return dbPromise.then(db => {
-            const tx = db.transaction(storeName, 'readwrite');
-            tx.objectStore(storeName).delete(key);
-            return tx.complete;
-          });
-        },
-        clear() {
-          return dbPromise.then(db => {
-            const tx = db.transaction(storeName, 'readwrite');
-            tx.objectStore(storeName).clear();
-            return tx.complete;
-          });
-        },
-        keys() {
-          return dbPromise.then(db => {
-            const tx = db.transaction(storeName);
-            const keys = [];
-            const store = tx.objectStore(storeName);
-
-            // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-            // openKeyCursor isn't supported by Safari, so we fall back
-            (store.iterateKeyCursor || store.iterateCursor).call(store, cursor => {
-              if (!cursor) return;
-              keys.push(cursor.key);
-              cursor.continue();
-            });
-
-            return tx.complete.then(() => keys);
-          });
-        }
-      };
+    async function executeScript(fn, cb, ...args) {
+      try {
+        await fn(cb, ...args);
+        cb()
+      } catch (e) {
+        cb(e.message);
+      }
     }
   </script>
 </body>

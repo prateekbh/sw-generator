@@ -23,7 +23,7 @@ import { testStaleWhileRevalidate } from '../../strategy-tests/strategy-tests';
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 
-describe('AMP Caching Module', function() {
+describe('AMP caching module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
 
@@ -161,7 +161,7 @@ describe('AMP Caching Module', function() {
         try {
           navigator.serviceWorker.controller.postMessage(
             JSON.stringify({
-              type: 'FIRST-VISIT-CACHING',
+              type: 'AMP__FIRST-VISIT-CACHING',
               payload,
             }),
           );

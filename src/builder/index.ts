@@ -34,9 +34,13 @@ export async function buildSW(
   {
     documentCachingOptions,
     assetCachingOptions,
+    linkPrefetchOptions,
+    mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
     assetCachingOptions: undefined,
+    linkPrefetchOptions: undefined,
+    mode: 'production',
   },
 ) {
   // Would like to use the TSC JavaScript API, but it is not stable yet.
@@ -47,7 +51,7 @@ export async function buildSW(
   const replacePatterns = [
     {
       test: 'process.env.NODE_ENV',
-      replace: "'production'",
+      replace: `'${mode || 'production'}'`,
     },
   ];
 
@@ -65,6 +69,15 @@ export async function buildSW(
       test: '__REPLACE_CONFIG_assetCachingOptions = []',
       replace: `__REPLACE_CONFIG_assetCachingOptions = ${serializeObject(
         assetCachingOptions,
+      )}`,
+    });
+  }
+
+  if (linkPrefetchOptions) {
+    replacePatterns.push({
+      test: '__REPLACE_CONFIG_isLinkPrefetchOptions = undefined',
+      replace: `__REPLACE_CONFIG_isLinkPrefetchOptions = ${serializeObject(
+        linkPrefetchOptions,
       )}`,
     });
   }

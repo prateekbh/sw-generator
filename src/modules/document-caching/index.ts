@@ -15,58 +15,31 @@
  */
 
 // @ts-ignore
-import router, { NavigationRoute } from 'workbox-routing';
+import router from 'workbox-routing';
 // @ts-ignore
 import { NetworkFirst } from 'workbox-strategies';
 // @ts-ignore
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
-// @ts-ignore
-import { Plugin } from 'workbox-cache-expiration';
+import AmpDocumentCachablePlugin from './AmpDocumentCachablePlugin';
+import AmpNavigationRoute from './AmpNavigationRoute';
 
 export type DocumentCachingOptions = {
   allowList?: Array<RegExp>;
   denyList?: Array<RegExp>;
   timeoutSeconds?: Number;
   maxDocumentsInCache?: Number;
+  maxAgeSecondsforDocumentsInCache?: Number;
 };
 
 const cacheName = 'AMP-PUBLISHER-CACHE';
 
-class AmpDocumentCachablePlugin extends Plugin {
-  constructor(config: any) {
-    super(config);
-  }
-  async cacheWillUpdate({
-    response,
-  }: {
-    response: Response;
-  }): Promise<Response | null> {
-    const clonedResponse = response.clone();
-    const responseContentType = clonedResponse.headers.get('content-type');
-    // TODO: implement header check as well as it'll be less work.
-    if (responseContentType && responseContentType.includes('text/html')) {
-      try {
-        const responseBody = await clonedResponse.text();
-        // Check if the response is AMP HTML page, only then cache it.
-        if (/<html (⚡|amphtml)/.test(responseBody)) {
-          return response;
-        }
-      } catch (e) {
-        return null;
-      }
-      return null;
-    }
-    // Non HTML responses will/should have reached here in first place.
-    return null;
-  }
-}
-
 export function documentCaching(
   documentCachingOptions: DocumentCachingOptions = {
     maxDocumentsInCache: 10,
+    maxAgeSecondsforDocumentsInCache: 5 * 24 * 60 * 60,
     timeoutSeconds: 3,
   },
-): void {
+): AmpNavigationRoute {
   enableNagigationPreload();
   const navigationPreloadOptions: {
     whitelist?: Array<RegExp>;
@@ -96,20 +69,25 @@ export function documentCaching(
     documentCachingOptions.maxDocumentsInCache = 10;
   }
 
-  router.registerRoute(
-    new NavigationRoute(
-      new NetworkFirst({
-        cacheName,
-        plugins: [
-          new AmpDocumentCachablePlugin({
-            maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
-          }),
-        ],
-        networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,
-      }),
-      navigationPreloadOptions,
-    ),
+  const navRoute = new AmpNavigationRoute(
+    new NetworkFirst({
+      cacheName,
+      plugins: [
+        new AmpDocumentCachablePlugin({
+          maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
+          maxAgeSeconds:
+            documentCachingOptions.maxAgeSecondsforDocumentsInCache ||
+            5 * 24 * 60 * 60,
+        }),
+      ],
+      networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,
+    }),
+    navigationPreloadOptions,
   );
+
+  router.registerRoute(navRoute);
+
+  return navRoute;
 }
 
 /**

@@ -70,3 +70,6 @@ build
 #generated service workers in test and sample folder
 test/**/*-sw.js
 sample/**/*-sw.js
+
+#deploy configs
+.netlify

@@ -24,7 +24,7 @@ const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 const cacheName = 'AMP-PUBLISHER-CACHE';
 
-describe('Document Caching Module', function() {
+describe('Document caching module', function() {
   const driver = global.__AMPSW.driver;
   const serviceWorkerPath = join('test', 'document-caching-sw.js');
 
