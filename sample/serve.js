@@ -9,15 +9,12 @@ const writeFile = promisify(fs.writeFile);
 
 (async function(){
   const serviceWorker = await buildSW({
-    assetCachingOptions: [
-      {
-        cachingStrategy: 'NETWORK_FIRST',
-        regexp: /.(png|jpg)/
-      }
-    ],
-    linkPrefetchEnabled: true,
+    documentCachingOptions: {
+      timeoutSeconds: 1.5,
+    },
   });
-  await writeFile(path.join(__dirname, 'amp-sw.js'), serviceWorker);
+  await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
+  await writeFile(path.join(__dirname, 'Beck &amp; Galo', 'amp-sw.js'), serviceWorker);
   const serveDir = new nodeStatic.Server('./sample');
   http.createServer((request, response) => {
     request.addListener('end', function () {

@@ -21,7 +21,6 @@ export class AmpPrefetchPlugin extends Plugin {
   _config: any;
   constructor(config: any) {
     super(config);
-    console.log(config);
   }
   async cacheWillUpdate({
     request,

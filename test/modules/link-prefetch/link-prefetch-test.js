@@ -35,21 +35,7 @@ describe('Link prefetch module', function() {
   });
 
   beforeEach(async () => {
-    await driver.get('http://localhost:6881/test/index.html');
-    await driver.executeAsyncScript(async cb => {
-      window.__cacheName = 'AMP-PREFETCHED-LINKS';
-      await window.__testCleanup();
-      const registration = await navigator.serviceWorker.register(
-        '/test/link-prefetch-sw.js',
-      );
-      await window.__waitForSWState(registration, 'activated');
-      cb();
-    });
-    const swRegCount = await driver.executeAsyncScript(async cb => {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      cb(regs.length);
-    });
-    expect(swRegCount).to.be.equal(1);
+    await registerSW(driver);
   });
 
   after(async () => {
@@ -57,16 +43,7 @@ describe('Link prefetch module', function() {
   });
 
   afterEach(async () => {
-    await driver.get('http://localhost:6881/test/index.html');
-    await driver.executeAsyncScript(async cb => {
-      try {
-        await window.__testCleanup();
-        window.__cacheName = null;
-        cb();
-      } catch (e) {
-        cb(); // NOOP
-      }
-    });
+    await unregisterSW(driver);
   });
 
   it('should listen to the postMessage and put the qualifying URLs in cache', async () => {
@@ -92,10 +69,6 @@ describe('Link prefetch module', function() {
       'http://localhost:6881/test/accordian.amp.html',
       'http://localhost:6881/test/alternate.amp.html',
     ]);
-  });
-
-  it('should add the already prefetched links to navigationPreload denyList', async () => {
-    expect(false).to.be.equal(true);
   });
 
   it('should respond with CacheFirst for the prefetched request', async () => {
@@ -151,6 +124,30 @@ describe('Link prefetch module', function() {
     expect(response).to.not.be.equal('hello world');
   });
 });
+
+async function registerSW(driver) {
+  await performCleanupAndWaitForSWActivation(
+    driver,
+    '/test/link-prefetch-sw.js',
+  );
+  await driver.executeAsyncScript(async cb => {
+    window.__cacheName = 'AMP-PREFETCHED-LINKS';
+    cb();
+  });
+}
+
+async function unregisterSW(driver) {
+  await driver.get('http://localhost:6881/test/index.html');
+  await driver.executeAsyncScript(async cb => {
+    try {
+      await window.__testCleanup();
+      window.__cacheName = null;
+      cb();
+    } catch (e) {
+      cb(); // NOOP
+    }
+  });
+}
 
 async function addDummyResponseToCache(driver) {
   return await driver.executeAsyncScript(async (url, cb) => {
