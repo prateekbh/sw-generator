@@ -32,10 +32,6 @@ describe('AMP caching module', function() {
     await writeFile(serviceWorkerPath, generatedSW);
   });
 
-  after(async () => {
-    await unlink(serviceWorkerPath);
-  });
-
   beforeEach(async () => {
     await driver.navigate().refresh();
     await driver.executeAsyncScript(async cb => {
@@ -79,7 +75,7 @@ describe('AMP caching module', function() {
         checkForCachedResponse(cacheName, scriptURL, driver));
 
       it('should not expire cached Response after 13 days', async () => {
-        const responseText = await getPrePostCacheData(
+        const responseText = await addPreDatedResponseToCache(
           cacheName,
           scriptURL,
           driver,
@@ -89,7 +85,7 @@ describe('AMP caching module', function() {
       });
 
       it('should expire cached Response after 15 days', async () => {
-        const responseText = await getPrePostCacheData(
+        const responseText = await addPreDatedResponseToCache(
           cacheName,
           scriptURL,
           driver,
@@ -115,7 +111,7 @@ describe('AMP caching module', function() {
         checkScriptExistanceInCache(cacheName, driver, scriptURL));
 
       it('should not expire cached Response after an hour', async () => {
-        const responseText = await getPrePostCacheData(
+        const responseText = await addPreDatedResponseToCache(
           cacheName,
           scriptURL,
           driver,
@@ -125,7 +121,7 @@ describe('AMP caching module', function() {
       });
 
       it('should expire cached Response after 2 days', async () => {
-        const responseText = await getPrePostCacheData(
+        const responseText = await addPreDatedResponseToCache(
           cacheName,
           scriptURL,
           driver,
@@ -241,7 +237,12 @@ async function checkForCachedResponse(cacheName, scriptURL, driver) {
   expect(fetchResponse).to.be.equal(DUMMY_RESPONSE);
 }
 
-async function getPrePostCacheData(cacheName, scriptURL, driver, timeDelta) {
+async function addPreDatedResponseToCache(
+  cacheName,
+  scriptURL,
+  driver,
+  timeDelta,
+) {
   await checkForCachedResponse(cacheName, scriptURL, driver);
   return await driver.executeAsyncScript(
     async (cacheName, scriptURL, timeDelta, cb) => {
