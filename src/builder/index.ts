@@ -96,15 +96,9 @@ export async function buildSW(
       replace({
         patterns: replacePatterns,
       }),
-      compiler(
-        {
-          compilation_level: 'ADVANCED',
-          jscomp_off: 'checkVars',
-        },
-        {
-          mangleReservedWords: ['Plugin'],
-        },
-      ),
+      compiler({
+        compilation_level: 'simple',
+      }),
     ],
   });
   const { code } = await bundle.generate({
