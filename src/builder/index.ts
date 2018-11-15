@@ -28,8 +28,7 @@ import replace from 'rollup-plugin-re';
 import resolve from 'rollup-plugin-node-resolve';
 // @ts-ignore
 import babel from 'rollup-plugin-babel';
-// @ts-ignore
-//const compiler = require('@ampproject/rollup-plugin-closure-compiler');
+const compiler = require('@ampproject/rollup-plugin-closure-compiler');
 
 export async function buildSW(
   {
@@ -97,15 +96,9 @@ export async function buildSW(
       replace({
         patterns: replacePatterns,
       }),
-      // compiler(
-      //   {
-      //     compilation_level: 'ADVANCED',
-      //     jscomp_off: 'checkVars',
-      //   },
-      //   {
-      //     mangleReservedWords: ['Plugin'],
-      //   },
-      // ),
+      compiler({
+        compilation_level: 'simple',
+      }),
     ],
   });
   const { code } = await bundle.generate({
