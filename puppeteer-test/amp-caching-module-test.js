@@ -41,7 +41,7 @@ describe('AMP caching module', () => {
     const totalAmpScriptsLoadTimeWithSW = await page.evaluate(() => {
       return performance.getEntriesByType('resource').filter(resource => resource.initiatorType === "script").reduce((current, next) => current + next.duration, 0)
     });
-    expect(totalAmpScriptsLoadTimeWithSW).to.be.lessThan(0.15 * totalAmpScriptsLoadTimeWithoutSW);
+    expect(totalAmpScriptsLoadTimeWithSW).to.be.lessThan(0.4 * totalAmpScriptsLoadTimeWithoutSW);
   });
 });
 
