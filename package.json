@@ -6,7 +6,8 @@
   "scripts": {
     "transpile": "tsc -p ./src/tsconfig.json",
     "pretest": "npm run transpile",
-    "test": "node -r esm ./test/index.js",
+    "test": "node -r esm ./test/index.js && npm run test:perf",
+    "test:perf": "mocha ./perf-test/perf-test.js  -t 30000 --exit",
     "start": "node -r esm ./index.js",
     "presample": "npm run transpile",
     "sample": "node -r esm ./sample/serve.js"
@@ -37,6 +38,7 @@
     "husky": "1.1.2",
     "lint-staged": "7.3.0",
     "mocha": "5.2.0",
+    "node-fetch": "^2.3.0",
     "node-static": "0.7.11",
     "npm-run": "5.0.1",
     "prettier": "1.14.3",
