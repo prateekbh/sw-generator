@@ -17,11 +17,11 @@
 // @ts-ignore
 import router from 'workbox-routing';
 // @ts-ignore
-import { NetworkFirst } from 'workbox-strategies';
-// @ts-ignore
 import { enable as enableNagigationPreload } from 'workbox-navigation-preload';
+import { cacheName } from './constants';
 import AmpDocumentCachablePlugin from './AmpDocumentCachablePlugin';
 import AmpNavigationRoute from './AmpNavigationRoute';
+import { AmpDocumentNetworkFirst } from './AmpDocumentNetworkFirst';
 
 export type DocumentCachingOptions = {
   allowList?: Array<RegExp>;
@@ -31,14 +31,13 @@ export type DocumentCachingOptions = {
   maxAgeSecondsforDocumentsInCache?: Number;
 };
 
-const cacheName = 'AMP-PUBLISHER-CACHE';
-
 export function documentCaching(
   documentCachingOptions: DocumentCachingOptions = {
     maxDocumentsInCache: 10,
     maxAgeSecondsforDocumentsInCache: 5 * 24 * 60 * 60,
     timeoutSeconds: 3,
   },
+  fallbackOfflinePageUrl?: string,
 ): AmpNavigationRoute {
   enableNagigationPreload();
   const navigationPreloadOptions: {
@@ -70,18 +69,21 @@ export function documentCaching(
   }
 
   const navRoute = new AmpNavigationRoute(
-    new NetworkFirst({
-      cacheName,
-      plugins: [
-        new AmpDocumentCachablePlugin({
-          maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
-          maxAgeSeconds:
-            documentCachingOptions.maxAgeSecondsforDocumentsInCache ||
-            5 * 24 * 60 * 60,
-        }),
-      ],
-      networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,
-    }),
+    new AmpDocumentNetworkFirst(
+      {
+        cacheName,
+        plugins: [
+          new AmpDocumentCachablePlugin({
+            maxEntries: documentCachingOptions.maxDocumentsInCache || 10,
+            maxAgeSeconds:
+              documentCachingOptions.maxAgeSecondsforDocumentsInCache ||
+              5 * 24 * 60 * 60,
+          }),
+        ],
+        networkTimeoutSeconds: documentCachingOptions.timeoutSeconds,
+      },
+      fallbackOfflinePageUrl,
+    ),
     navigationPreloadOptions,
   );
 

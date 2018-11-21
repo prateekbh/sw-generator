@@ -12,6 +12,9 @@ const writeFile = promisify(fs.writeFile);
     documentCachingOptions: {
       timeoutSeconds: 1.5,
     },
+    offlinePageOptions: {
+      url: '/menu.amp.html'
+    }
   });
   await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
   await writeFile(path.join(__dirname, 'Menu', 'amp-sw.js'), serviceWorker);

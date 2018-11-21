@@ -20,14 +20,11 @@ import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
 
-// @ts-ignore
-import npmRun from 'npm-run';
-// @ts-ignore
-import replace from 'rollup-plugin-re';
-// @ts-ignore
-import resolve from 'rollup-plugin-node-resolve';
-// @ts-ignore
-import babel from 'rollup-plugin-babel';
+const npmRun = require('npm-run');
+const replace = require('rollup-plugin-re');
+const resolve = require('rollup-plugin-node-resolve');
+const babel = require('rollup-plugin-babel');
+//import {fetchRequiredAssetsForUrl} from './asset-gatherer';
 // @ts-ignore
 //const compiler = require('@ampproject/rollup-plugin-closure-compiler');
 
@@ -36,11 +33,13 @@ export async function buildSW(
     documentCachingOptions,
     assetCachingOptions,
     linkPrefetchOptions,
+    offlinePageOptions,
     mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
     assetCachingOptions: undefined,
     linkPrefetchOptions: undefined,
+    offlinePageOptions: undefined,
     mode: 'production',
   },
 ) {
@@ -79,6 +78,15 @@ export async function buildSW(
       test: '__REPLACE_CONFIG_isLinkPrefetchOptions = undefined',
       replace: `__REPLACE_CONFIG_isLinkPrefetchOptions = ${serializeObject(
         linkPrefetchOptions,
+      )}`,
+    });
+  }
+
+  if (offlinePageOptions && offlinePageOptions.url) {
+    replacePatterns.push({
+      test: '__REPLACE_CONFIG_offlinePageOptions = {}',
+      replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject(
+        offlinePageOptions,
       )}`,
     });
   }
