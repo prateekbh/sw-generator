@@ -72,7 +72,10 @@ if (__REPLACE_CONFIG_isLinkPrefetchOptions) {
 }
 
 if (__REPLACE_CONFIG_offlinePageOptions.url) {
-  installOfflinePage(__REPLACE_CONFIG_offlinePageOptions.url);
+  installOfflinePage(
+    __REPLACE_CONFIG_offlinePageOptions.url,
+    __REPLACE_CONFIG_offlinePageOptions.assets || [],
+  );
 }
 
 // Taking over the document

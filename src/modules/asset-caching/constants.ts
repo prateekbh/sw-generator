@@ -14,20 +14,4 @@
  * limitations under the License.
  */
 
-import { cacheName as documentCache } from '../document-caching/constants';
-import { cacheName as assetCache } from '../asset-caching/constants';
-
-export type OfflinePageOptions = {
-  url?: string;
-  assets?: Array<string>;
-};
-
-export async function installOfflinePage(url: string, assets: Array<string>) {
-  const publisherCache = await caches.open(documentCache);
-  const assetsCache = await caches.open(assetCache);
-  const response = await fetch(url);
-  if (response.ok) {
-    await publisherCache.add(url);
-  }
-  await assetsCache.addAll(assets);
-}
+export const cacheName = 'AMP-ASSET-CACHE';
