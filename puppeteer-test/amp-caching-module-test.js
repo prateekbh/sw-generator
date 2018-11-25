@@ -11,9 +11,9 @@ describe('AMP caching module', () => {
     await page.goto('https://nopwamp.netlify.com', {
       waitUntil: 'networkidle0'
     });
-    // remove intercepts
-    await page.removeAllListeners('request');
-    await page.setRequestInterception(false);
+    // // remove intercepts
+    // await page.removeAllListeners('request');
+    // await page.setRequestInterception(false);
     // let cache expire
     await sleep(4000);
     // reload the page
@@ -58,6 +58,7 @@ async function interceptAmpScripts(page) {
     if (/https:\/\/cdn.ampproject.org\/.*\.js/.test(request.url())) {
       const response = await fetch(request.url());
       const body = await response.text();
+      await sleep(500);
       request.respond({
           status: 200,
           contentType: 'application/javascript; charset=utf-8',
@@ -72,3 +73,8 @@ async function interceptAmpScripts(page) {
   });
 }
 
+function sleep(delay) {
+  return new Promise(resolve=> {
+    setInterval(resolve, delay);
+  })
+}
