@@ -28,12 +28,7 @@ export async function fetchRequiredAssetsForUrl(url: String) {
       'resource',
     ) as PerformanceResourceTiming[];
     return entries
-      .filter(
-        resource =>
-          resource.initiatorType === 'script' ||
-          resource.initiatorType === 'css' ||
-          resource.initiatorType === 'img',
-      )
+      .filter(resource => resource.initiatorType === 'img')
       .map(resource => resource.name);
   });
   browser.close();

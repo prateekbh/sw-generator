@@ -4,13 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "microbundle -f cjs --target node --no-compress",
     "transpile": "tsc -p ./src/tsconfig.json",
     "pretest": "npm run transpile",
     "test": "node -r esm ./test/index.js",
     "start": "node -r esm ./index.js",
     "presample": "npm run transpile",
-    "sample": "node -r esm ./sample/serve.js"
+    "sample": "node ./sample/serve.js"
   },
   "repository": {
     "type": "git",
@@ -36,7 +35,6 @@
     "glob-fs": "0.1.7",
     "husky": "1.1.2",
     "lint-staged": "7.3.0",
-    "microbundle": "^0.7.0",
     "mocha": "5.2.0",
     "node-static": "0.7.11",
     "npm-run": "5.0.1",

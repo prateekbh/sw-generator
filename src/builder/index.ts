@@ -19,12 +19,12 @@ import { rollup } from 'rollup';
 import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
+import { fetchRequiredAssetsForUrl } from './asset-gatherer';
 
 const npmRun = require('npm-run');
 const replace = require('rollup-plugin-re');
 const resolve = require('rollup-plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
-//import {fetchRequiredAssetsForUrl} from './asset-gatherer';
 // @ts-ignore
 //const compiler = require('@ampproject/rollup-plugin-closure-compiler');
 
@@ -85,9 +85,10 @@ export async function buildSW(
   if (offlinePageOptions && offlinePageOptions.url) {
     replacePatterns.push({
       test: '__REPLACE_CONFIG_offlinePageOptions = {}',
-      replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject(
-        offlinePageOptions,
-      )}`,
+      replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject({
+        url: offlinePageOptions.url,
+        assets: await fetchRequiredAssetsForUrl(offlinePageOptions.url),
+      })}`,
     });
   }
 
