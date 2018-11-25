@@ -24,9 +24,10 @@ export async function fetchRequiredAssetsForUrl(url: String) {
     waitUntil: 'networkidle0',
   });
   const result = await page.evaluate(() => {
-    // @ts-ignore
-    return performance
-      .getEntriesByType('resource')
+    const entries: PerformanceResourceTiming[] = performance.getEntriesByType(
+      'resource',
+    ) as PerformanceResourceTiming[];
+    return entries
       .filter(
         resource =>
           resource.initiatorType === 'script' ||

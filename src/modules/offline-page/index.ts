@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
+import { cacheName } from '../document-caching/constants';
+
 export type OfflinePageOptions = {
   url?: string;
 };
 
-export default function installOfflinePage(url: string) {}
+export async function installOfflinePage(url: string) {
+  const publisherCache = await caches.open(cacheName);
+  const response = await fetch(url);
+  if (response.ok) {
+    await publisherCache.add(url);
+  }
+}

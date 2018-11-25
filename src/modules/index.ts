@@ -26,7 +26,7 @@ import {
   LinkPrefetchOptions,
   registerPrefetchLinks,
 } from './link-prefetch';
-import installOfflinePage, { OfflinePageOptions } from './offline-page';
+import { installOfflinePage, OfflinePageOptions } from './offline-page';
 
 /**
  * The builder generates a sw.js file for the user, for this it has to

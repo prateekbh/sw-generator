@@ -13,7 +13,7 @@ const writeFile = promisify(fs.writeFile);
       timeoutSeconds: 1.5,
     },
     offlinePageOptions: {
-      url: '/menu.amp.html'
+      url: '/offline.html'
     }
   });
   await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
