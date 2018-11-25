@@ -7,7 +7,7 @@ describe('AMP caching module', () => {
     const browser = await puppeteer.launch();
     let page = await browser.newPage();
     await interceptAmpScripts(page);
-    // load tpage the first time
+    // load page for the first time
     await page.goto('https://nopwamp.netlify.com', {
       waitUntil: 'networkidle0'
     });
@@ -15,7 +15,7 @@ describe('AMP caching module', () => {
     await page.removeAllListeners('request');
     await page.setRequestInterception(false);
     // let cache expire
-    await sleep(7000);
+    await sleep(4000);
     // reload the page
     await page.reload({
       waitUntil: 'networkidle0'
@@ -33,7 +33,7 @@ describe('AMP caching module', () => {
     await page.removeAllListeners('request');
     await page.setRequestInterception(false);
     // let cache expire
-    await sleep(7000);
+    await sleep(4000);
     // reload the page
     await page.reload({
       waitUntil: 'networkidle0'
@@ -41,7 +41,7 @@ describe('AMP caching module', () => {
     const totalAmpScriptsLoadTimeWithSW = await page.evaluate(() => {
       return performance.getEntriesByType('resource').filter(resource => resource.initiatorType === "script").reduce((current, next) => current + next.duration, 0)
     });
-    expect(totalAmpScriptsLoadTimeWithSW).to.be.lessThan(0.4 * totalAmpScriptsLoadTimeWithoutSW);
+    expect(totalAmpScriptsLoadTimeWithSW).to.be.lessThan(0.5 * totalAmpScriptsLoadTimeWithoutSW);
   });
 });
 
@@ -62,7 +62,7 @@ async function interceptAmpScripts(page) {
           status: 200,
           contentType: 'application/javascript; charset=utf-8',
           headers: {
-            'cache-control': 'private, max-age=5' // cache only for 5 seconds
+            'cache-control': 'private, max-age=1' // cache only for 1 seconds
           },
           body,
       });
