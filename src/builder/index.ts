@@ -21,12 +21,15 @@ import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
 import { fetchRequiredAssetsForUrl } from './asset-gatherer';
 
-const npmRun = require('npm-run');
-const replace = require('rollup-plugin-re');
-const resolve = require('rollup-plugin-node-resolve');
-const babel = require('rollup-plugin-babel');
 // @ts-ignore
-//const compiler = require('@ampproject/rollup-plugin-closure-compiler');
+import npmRun from 'npm-run';
+// @ts-ignore
+import replace from 'rollup-plugin-re';
+// @ts-ignore
+import resolve from 'rollup-plugin-node-resolve';
+// @ts-ignore
+import babel from 'rollup-plugin-babel';
+const compiler = require('@ampproject/rollup-plugin-closure-compiler');
 
 export async function buildSW(
   {
@@ -106,15 +109,9 @@ export async function buildSW(
       replace({
         patterns: replacePatterns,
       }),
-      // compiler(
-      //   {
-      //     compilation_level: 'ADVANCED',
-      //     jscomp_off: 'checkVars',
-      //   },
-      //   {
-      //     mangleReservedWords: ['Plugin'],
-      //   },
-      // ),
+      compiler({
+        compilation_level: 'simple',
+      }),
     ],
   });
   const { code } = await bundle.generate({
