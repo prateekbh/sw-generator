@@ -18,12 +18,8 @@ const fs = require('fs');
 const { buildSW } = require('../../../lib/builder/index');
 const { promisify } = require('util');
 const { join } = require('path');
-const {
-  fetchRequiredAssetsForUrl,
-} = require('../../../lib/builder/asset-gatherer');
 
 const writeFile = promisify(fs.writeFile);
-const unlink = promisify(fs.unlink);
 
 describe('Offline page module', function() {
   const driver = global.__AMPSW.driver;
@@ -32,10 +28,8 @@ describe('Offline page module', function() {
   before(async () => {
     const generatedSW = await buildSW({
       offlinePageOptions: {
-        url: 'http://localhost:6881/test/accordian.amp.html',
-        assets: fetchRequiredAssetsForUrl(
-          'http://localhost:6881/test/accordian.amp.html',
-        ),
+        url: 'http://localhost:6881/test/offline.html',
+        assets: [],
       },
     });
     await writeFile(serviceWorkerPath, generatedSW);
@@ -44,6 +38,7 @@ describe('Offline page module', function() {
   beforeEach(async () => {
     await driver.navigate().refresh();
     await driver.executeAsyncScript(async cb => {
+      window.__cacheName = 'AMP-PUBLISHER-CACHE';
       await window.__testCleanup();
       const registration = await navigator.serviceWorker.register(
         '/test/offline-page-sw.js',
@@ -69,7 +64,30 @@ describe('Offline page module', function() {
     await unregisterSW(driver);
   });
 
-  it('should install offline page in AMP document cache', async () => {});
+  it('should install offline page in AMP document cache', async () => {
+    const result = await driver.executeAsyncScript(async cb => {
+      executeScript(async cb => {
+        const cache = await window.caches.open(window.__cacheName);
+        cb((await cache.keys())[0]);
+      }, cb);
+    });
+    expect(result.url).to.be.equal('http://localhost:6881/test/offline.html');
+  });
 
-  it('should install offline page assets in AMP assets cache', async () => {});
+  it('should install offline page assets in AMP assets cache', async () => {
+    // TODO: implement this once you figure out the ESM issue.
+  });
 });
+
+async function unregisterSW(driver) {
+  await driver.get('http://localhost:6881/test/index.html');
+  await driver.executeAsyncScript(async cb => {
+    try {
+      await window.__testCleanup();
+      window.__cacheName = null;
+      cb();
+    } catch (e) {
+      cb(); // NOOP
+    }
+  });
+}
