@@ -40,9 +40,6 @@ export async function buildSW(
     mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
-    assetCachingOptions: undefined,
-    linkPrefetchOptions: undefined,
-    offlinePageOptions: undefined,
     mode: 'production',
   },
 ) {

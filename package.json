@@ -11,7 +11,7 @@
     "test:perf": "mocha ./puppeteer-test/amp-caching-module-test.js  -t 30000 --exit",
     "start": "node -r esm ./index.js",
     "presample": "npm run transpile",
-    "sample": "node ./sample/serve.js"
+    "sample": "node -r esm ./sample/serve.js"
   },
   "repository": {
     "type": "git",

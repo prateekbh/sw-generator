@@ -15,7 +15,6 @@
  */
 
 import seleniumAssistant from 'selenium-assistant';
-import { join } from 'path';
 import Mocha from 'mocha';
 import { expect } from 'chai';
 import { argv } from 'yargs';
