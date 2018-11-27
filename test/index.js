@@ -21,6 +21,7 @@ import { argv } from 'yargs';
 import http from 'http';
 import nodeStatic from 'node-static';
 import glob from 'glob-fs';
+const handler = require('serve-handler');
 
 const isLocalExecution = !!argv['local'];
 const serveDir = new nodeStatic.Server('./');
@@ -28,11 +29,11 @@ const globfinder = glob();
 
 const server = http.createServer((request, response) => {
   request
-    .addListener('end', function() {
+    .addListener('end', async () => {
       //
       // Serve files!
       //
-      serveDir.serve(request, response);
+      await handler(request, response);
     })
     .resume();
 });
