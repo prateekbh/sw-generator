@@ -17,14 +17,14 @@ const writeFile = promisify(fs.writeFile);
         "public": "sample"
       });
     }).resume();
-  }).listen(5000, async () => {
-    console.log('listening on http://localhost:5000/');
+  }).listen(8080, async () => {
+    console.log('listening on http://localhost:8080/');
     const serviceWorker = await buildSW({
       documentCachingOptions: {
         timeoutSeconds: 1.5,
       },
       offlinePageOptions: {
-        url: 'http://localhost:5000/menu/offline.html'
+        url: 'http://localhost:8080/menu/offline.html'
       }
     });
     await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);

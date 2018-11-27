@@ -26,7 +26,7 @@ export async function installOfflinePage(url: string, assets: Array<string>) {
   const assetsCache = await caches.open(assetCache);
   const response = await fetch(url);
   if (response.ok) {
-    await publisherCache.add(url);
+    await publisherCache.put(new Request(url), response);
     await assetsCache.addAll(assets);
   }
 }
