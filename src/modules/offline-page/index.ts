@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import { DocumentCachingOptions } from './modules/document-caching';
-import { AssetCachingOptions } from './modules/asset-caching';
-import { LinkPrefetchOptions } from './modules/link-prefetch';
-import { OfflinePageOptions } from './modules/offline-page';
+import { cacheName as documentCache } from '../document-caching/constants';
+import { cacheName as assetCache } from '../asset-caching/constants';
 
-export interface ServiceWorkerConfiguration {
-  documentCachingOptions: DocumentCachingOptions;
-  assetCachingOptions?: AssetCachingOptions;
-  linkPrefetchOptions?: LinkPrefetchOptions;
-  offlinePageOptions?: OfflinePageOptions;
-  mode?: 'local' | 'production';
+export type OfflinePageOptions = {
+  url?: string;
+  assets?: Array<string>;
+};
+
+export async function installOfflinePage(url: string, assets: Array<string>) {
+  const publisherCache = await caches.open(documentCache);
+  const assetsCache = await caches.open(assetCache);
+  const response = await fetch(url);
+  if (response.ok) {
+    await publisherCache.add(url);
+  }
+  await assetsCache.addAll(assets);
 }

@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-import { DocumentCachingOptions } from './modules/document-caching';
-import { AssetCachingOptions } from './modules/asset-caching';
-import { LinkPrefetchOptions } from './modules/link-prefetch';
-import { OfflinePageOptions } from './modules/offline-page';
-
-export interface ServiceWorkerConfiguration {
-  documentCachingOptions: DocumentCachingOptions;
-  assetCachingOptions?: AssetCachingOptions;
-  linkPrefetchOptions?: LinkPrefetchOptions;
-  offlinePageOptions?: OfflinePageOptions;
-  mode?: 'local' | 'production';
-}
+export const cacheName = 'AMP-ASSET-CACHE';

@@ -26,21 +26,28 @@ import {
   LinkPrefetchOptions,
   registerPrefetchLinks,
 } from './link-prefetch';
+import { installOfflinePage, OfflinePageOptions } from './offline-page';
 
 /**
- * These config are replaced by a rollup plugin during the build process.
+ * The builder generates a sw.js file for the user, for this it has to
+ * inline the user options into a file which is the entry point for
+ * the rollup process.
+ * Every constant starting with `__REPLACE_CONFIG_` is replaced by rollup plugin
+ * during the build process.
  */
 const __REPLACE_CONFIG_documentCachingOptions: DocumentCachingOptions = {};
 const __REPLACE_CONFIG_assetCachingOptions: AssetCachingOptions = [];
 const __REPLACE_CONFIG_isLinkPrefetchOptions:
   | LinkPrefetchOptions
   | undefined = undefined;
+const __REPLACE_CONFIG_offlinePageOptions: OfflinePageOptions = {};
 
 // Initialize all required modules.
 ampAssetsCaching();
 listenForFetchedScripts();
 const navigationRoute = documentCaching(
   __REPLACE_CONFIG_documentCachingOptions,
+  __REPLACE_CONFIG_offlinePageOptions.url,
 );
 
 /**
@@ -62,6 +69,13 @@ if (__REPLACE_CONFIG_isLinkPrefetchOptions) {
     __REPLACE_CONFIG_isLinkPrefetchOptions,
   );
   listenForLinkPrefetches();
+}
+
+if (__REPLACE_CONFIG_offlinePageOptions.url) {
+  installOfflinePage(
+    __REPLACE_CONFIG_offlinePageOptions.url,
+    __REPLACE_CONFIG_offlinePageOptions.assets || [],
+  );
 }
 
 // Taking over the document
