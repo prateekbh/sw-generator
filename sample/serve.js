@@ -2,19 +2,20 @@ const {buildSW} = require('../lib/builder');
 const fs = require('fs');
 const path = require('path');
 const {promisify} = require('util');
-const nodeStatic = require('node-static');
 const http = require('http');
+const handler = require('serve-handler');
 
 const writeFile = promisify(fs.writeFile);
 
 (function(){
-  const serveDir = new nodeStatic.Server('./sample');
   http.createServer((request, response) => {
-    request.addListener('end', function () {
+    request.addListener('end', async () => {
       //
       // Serve files!
       //
-      serveDir.serve(request, response);
+      await handler(request, response, {
+        "public": "sample"
+      });
     }).resume();
   }).listen(5000, async () => {
     console.log('listening on http://localhost:5000/');
