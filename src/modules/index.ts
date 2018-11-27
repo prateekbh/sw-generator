@@ -26,7 +26,7 @@ import {
   LinkPrefetchOptions,
   registerPrefetchLinks,
 } from './link-prefetch';
-import { installOfflinePage, OfflinePageOptions } from './offline-page';
+import { installOfflinePage } from './offline-page';
 
 /**
  * The builder generates a sw.js file for the user, for this it has to
@@ -40,7 +40,10 @@ const __REPLACE_CONFIG_assetCachingOptions: AssetCachingOptions = [];
 const __REPLACE_CONFIG_isLinkPrefetchOptions:
   | LinkPrefetchOptions
   | undefined = undefined;
-const __REPLACE_CONFIG_offlinePageOptions: OfflinePageOptions = {};
+const __REPLACE_CONFIG_offlinePageOptions: {
+  url?: string;
+  assets?: Array<string>;
+} = {};
 
 // Initialize all required modules.
 ampAssetsCaching();
