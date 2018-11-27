@@ -19,7 +19,7 @@ import { rollup } from 'rollup';
 import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
-//import { fetchRequiredAssetsForUrl } from './asset-gatherer';
+import { fetchRequiredAssetsForUrl } from './asset-gatherer';
 
 // @ts-ignore
 import npmRun from 'npm-run';
@@ -87,7 +87,7 @@ export async function buildSW(
       test: '__REPLACE_CONFIG_offlinePageOptions = {}',
       replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject({
         url: offlinePageOptions.url,
-        assets: [],
+        assets: await fetchRequiredAssetsForUrl(offlinePageOptions.url),
       })}`,
     });
   }
