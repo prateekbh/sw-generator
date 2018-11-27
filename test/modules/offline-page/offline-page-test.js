@@ -29,7 +29,6 @@ describe('Offline page module', function() {
     const generatedSW = await buildSW({
       offlinePageOptions: {
         url: 'http://localhost:6881/test/offline.html',
-        assets: [],
       },
     });
     await writeFile(serviceWorkerPath, generatedSW);
@@ -38,7 +37,6 @@ describe('Offline page module', function() {
   beforeEach(async () => {
     await driver.navigate().refresh();
     await driver.executeAsyncScript(async cb => {
-      window.__cacheName = 'AMP-PUBLISHER-CACHE';
       await window.__testCleanup();
       const registration = await navigator.serviceWorker.register(
         '/test/offline-page-sw.js',
@@ -67,7 +65,7 @@ describe('Offline page module', function() {
   it('should install offline page in AMP document cache', async () => {
     const result = await driver.executeAsyncScript(async cb => {
       executeScript(async cb => {
-        const cache = await window.caches.open(window.__cacheName);
+        const cache = await window.caches.open('AMP-PUBLISHER-CACHE');
         cb((await cache.keys())[0]);
       }, cb);
     });
@@ -75,7 +73,15 @@ describe('Offline page module', function() {
   });
 
   it('should install offline page assets in AMP assets cache', async () => {
-    // TODO: implement this once you figure out the ESM issue.
+    const result = await driver.executeAsyncScript(async cb => {
+      executeScript(async cb => {
+        const cache = await window.caches.open('AMP-ASSET-CACHE');
+        cb((await cache.keys())[0]);
+      }, cb);
+    });
+    expect(result.url).to.be.equal(
+      'http://localhost:6881/test/fixtures/bar.jpg',
+    );
   });
 });
 

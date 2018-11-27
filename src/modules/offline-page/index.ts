@@ -18,8 +18,7 @@ import { cacheName as documentCache } from '../document-caching/constants';
 import { cacheName as assetCache } from '../asset-caching/constants';
 
 export type OfflinePageOptions = {
-  url?: string;
-  assets?: Array<string>;
+  url: string;
 };
 
 export async function installOfflinePage(url: string, assets: Array<string>) {
@@ -28,6 +27,6 @@ export async function installOfflinePage(url: string, assets: Array<string>) {
   const response = await fetch(url);
   if (response.ok) {
     await publisherCache.add(url);
+    await assetsCache.addAll(assets);
   }
-  await assetsCache.addAll(assets);
 }
