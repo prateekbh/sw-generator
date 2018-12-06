@@ -31,7 +31,9 @@ const server = http.createServer((request, response) => {
       //
       // Serve files!
       //
-      await handler(request, response);
+      await handler(request, response, {
+        cleanUrls: false,
+      });
     })
     .resume();
 });
