@@ -19,6 +19,7 @@ import { rollup } from 'rollup';
 import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 import getBabelConfig from './babel';
+import { fetchRequiredAssetsForUrl } from './asset-gatherer';
 
 // @ts-ignore
 import npmRun from 'npm-run';
@@ -35,11 +36,10 @@ export async function buildSW(
     documentCachingOptions,
     assetCachingOptions,
     linkPrefetchOptions,
+    offlinePageOptions,
     mode,
   }: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
-    assetCachingOptions: undefined,
-    linkPrefetchOptions: undefined,
     mode: 'production',
   },
 ) {
@@ -82,6 +82,16 @@ export async function buildSW(
     });
   }
 
+  if (offlinePageOptions && offlinePageOptions.url) {
+    replacePatterns.push({
+      test: '__REPLACE_CONFIG_offlinePageOptions = {}',
+      replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject({
+        url: offlinePageOptions.url,
+        assets: await fetchRequiredAssetsForUrl(offlinePageOptions.url),
+      })}`,
+    });
+  }
+
   const babelConfig = getBabelConfig({
     documentCachingOptions,
     assetCachingOptions,
@@ -96,9 +106,10 @@ export async function buildSW(
       replace({
         patterns: replacePatterns,
       }),
-      compiler({
-        compilation_level: 'simple',
-      }),
+      mode === 'production' &&
+        compiler({
+          compilation_level: 'simple',
+        }),
     ],
   });
   const { code } = await bundle.generate({

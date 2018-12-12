@@ -24,6 +24,7 @@ import {
 } from 'workbox-strategies';
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
+import { cacheName } from './constants';
 
 export type AssetCachingOptions = Array<{
   regexp: RegExp;
@@ -73,7 +74,7 @@ export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
   assetCachingOptions.forEach(assetCachingOption => {
     let cachingStrategy = null;
     const cachingConfig = {
-      cacheName: 'AMP-ASSET-CACHE',
+      cacheName,
       plugins: [
         new AssetCachingPlugin({
           maxEntries: 25,

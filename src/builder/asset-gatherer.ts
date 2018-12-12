@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import { DocumentCachingOptions } from './modules/document-caching';
-import { AssetCachingOptions } from './modules/asset-caching';
-import { LinkPrefetchOptions } from './modules/link-prefetch';
-import { OfflinePageOptions } from './modules/offline-page';
+const puppeteer = require('puppeteer');
 
-export interface ServiceWorkerConfiguration {
-  documentCachingOptions: DocumentCachingOptions;
-  assetCachingOptions?: AssetCachingOptions;
-  linkPrefetchOptions?: LinkPrefetchOptions;
-  offlinePageOptions?: OfflinePageOptions;
-  mode?: 'local' | 'production';
+export async function fetchRequiredAssetsForUrl(url: String) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.goto(url, {
+    waitUntil: 'networkidle0',
+  });
+  const result = await page.evaluate(() => {
+    const entries: PerformanceResourceTiming[] = performance.getEntriesByType(
+      'resource',
+    ) as PerformanceResourceTiming[];
+    return entries
+      .filter(resource => resource.initiatorType === 'img')
+      .map(resource => resource.name);
+  });
+  browser.close();
+  return result;
 }
