@@ -20,12 +20,17 @@ const writeFile = promisify(fs.writeFile);
   }).listen(8080, async () => {
     console.log('listening on http://localhost:8080/');
     const serviceWorker = await buildSW({
-      documentCachingOptions: {
-        timeoutSeconds: 1.5,
-      },
-      offlinePageOptions: {
-        url: 'http://localhost:8080/menu/offline.html'
-      }
+      assetCachingOptions: [
+        {
+          regexp: /cache.json$/,
+          cachingStrategy: 'CACHE_FIRST',
+        },
+        {
+          regexp: /network.json$/,
+          cachingStrategy: 'NETWORK_FIRST',
+        }
+      ],
+      mode: 'local'
     });
     await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
     await writeFile(path.join(__dirname, 'Menu', 'amp-sw.js'), serviceWorker);
