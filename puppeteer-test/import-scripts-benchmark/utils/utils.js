@@ -51,7 +51,7 @@ export async function preparePage(page, url) {
   await page._client.send("ServiceWorker.enable");
   console.log(yellow(`Navigating to ${url}`));
   await page.goto(url, {
-    waitUntil: "networkidle0"
+    waitUntil: "load"
   });
   await page.evaluate(async () => {
     const regs = await navigator.serviceWorker.getRegistration();

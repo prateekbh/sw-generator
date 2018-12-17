@@ -27,24 +27,26 @@ export async function getFetchStats(page, fetchUrl, runs) {
       await page.evaluate(async fetchUrl => {
         await fetch(fetchUrl);
       }, fetchUrl);
-      const preTiming = await page.evaluate(async fetchUrl => {
+      const preKillTiming = JSON.parse(await page.evaluate(async fetchUrl => {
         await fetch(fetchUrl);
         const entries = performance
           .getEntriesByType("resource")
           .filter(entry => entry.initiatorType === "fetch");
         return JSON.stringify(entries[entries.length - 1]);
-      }, fetchUrl);
+      }, fetchUrl));
+      preKillTiming['sw-state'] = "awake";
       await page._client.send("ServiceWorker.stopAllWorkers"); // stops the service worker
-      const postTiming = await page.evaluate(async fetchUrl => {
+      const postKillTiming = JSON.parse(await page.evaluate(async fetchUrl => {
         await fetch(fetchUrl);
         const entries = performance
           .getEntriesByType("resource")
           .filter(entry => entry.initiatorType === "fetch");
         return JSON.stringify(entries[entries.length - 1]);
-      }, fetchUrl);
+      }, fetchUrl));
+      preKillTiming['sw-state'] = "slept";
       results.push({
-        preTiming: JSON.parse(preTiming),
-        postTiming: JSON.parse(postTiming)
+        preKillTiming: preKillTiming,
+        postKillTiming: postKillTiming,
       });
     } catch (e) {
       console.log(red(`Failed fetch test run ${count + 1} of ${runs}`));
@@ -53,3 +55,4 @@ export async function getFetchStats(page, fetchUrl, runs) {
   console.log(yellow(`Run completed in ${Date.now() - startTime}ms.`));
   return results;
 }
+
