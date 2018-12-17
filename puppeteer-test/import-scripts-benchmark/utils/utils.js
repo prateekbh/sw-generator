@@ -20,6 +20,10 @@ import puppeteer from "puppeteer";
 import chalk from 'chalk';
 const {yellow, red} = chalk;
 
+/**
+ * Returns puppeteer browser by creating a new browser
+ * on desktop or conencting to an android phone.
+ */
 export async function getBrowser() {
   let browser;
   if (argv.desktop) {
@@ -47,6 +51,17 @@ export async function getBrowser() {
   return browser;
 }
 
+/**
+ * Clears any pre-installed sw on the given url and
+ * installs a new one.
+ * Returns a promise which resolves when the new sw
+ * is activated.
+ *
+ * @param {object} page
+ * @param {string} url
+ *
+ * @return {Promise}
+ */
 export async function preparePage(page, url) {
   await page._client.send("ServiceWorker.enable");
   console.log(yellow(`Navigating to ${url}`));

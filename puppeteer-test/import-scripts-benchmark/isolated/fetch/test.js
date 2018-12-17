@@ -20,7 +20,9 @@ import { argv } from "yargs";
 import { getBrowser, preparePage } from "../../utils/utils";
 import { getFetchStats } from "../common";
 import chalk from 'chalk';
-import { saveResults } from "../../utils/result-writer";
+import * as fs from 'fs';
+import {promisify} from 'util';
+const writeFile = promisify(fs.writeFile);
 
 const {yellow} = chalk;
 
@@ -37,12 +39,13 @@ const {yellow} = chalk;
   if (!options.site) {
     throw new Error('No Test Site specified.');
   }
+
   console.log(yellow('Connecting to browser.'));
   const browser = await getBrowser();
   const page = await browser.newPage();
   console.log(yellow('Preparing page by installing service worker.'));
   await preparePage(page, options.site);
   const stats = await getFetchStats(page, options.url, options.runs);
-  await saveResults(stats, options.out);
+  await writeFile(options.out, JSON.stringify(stats));
   process.exit(0);
 })();
