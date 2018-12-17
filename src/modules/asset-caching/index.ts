@@ -17,7 +17,7 @@
 // @ts-ignore
 import router from 'workbox-routing';
 import {
-  NetworkFirst,
+  NetworkOnly,
   CacheFirst,
   StaleWhileRevalidate,
   // @ts-ignore
@@ -85,7 +85,7 @@ export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
 
     switch (assetCachingOption.cachingStrategy) {
       case 'NETWORK_FIRST':
-        cachingStrategy = new NetworkFirst(cachingConfig);
+        cachingStrategy = new NetworkOnly(cachingConfig);
         break;
       case 'STALE_WHILE_REVALIDATE':
         cachingStrategy = new StaleWhileRevalidate(cachingConfig);

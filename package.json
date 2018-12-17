@@ -11,7 +11,12 @@
     "test:perf": "mocha ./puppeteer-test/amp-caching-module-test.js  -t 30000 --exit",
     "start": "node -r esm_prateek ./index.js",
     "presample": "npm run transpile",
-    "sample": "node -r esm_prateek ./sample/serve.js"
+    "sample": "node -r esm_prateek ./sample/serve.js",
+    "benchmark:cachefirst:importscript": "node -r esm_prateek ./fetch/test.js --site='https://importscript.surge.sh/' --url='/cache.json' --runs=1000 --out='result-cache-import.json'",
+    "benchmark:cachefirst:nonimportscript": "node -r esm_prateek ./fetch/test.js --site='https://nonimportscript.surge.sh/' --url='/cache.json' --runs=1000 --out='result-cache-nonimport.json'",
+    "benchmark:networkfirst:importscript": "node -r esm_prateek ./fetch/test.js --site='https://importscript.surge.sh/' --url='/network.json' --runs=1000 --out='result-network-import.json'",
+    "benchmark:networkfirst:nonimportscript": "node -r esm_prateek ./fetch/test.js --site='https://nonimportscript.surge.sh/' --url='/network.json' --runs=1000 --out='result-network-nonimport.json'",
+    "benchmark:importscript": "npm run benchmark:cachefirst:importscript && npm run benchmark:cachefirst:nonimportscript && npm run benchmark:networkfirst:importscript && npm run benchmark:networkfirst:nonimportscript"
   },
   "repository": {
     "type": "git",
@@ -32,6 +37,7 @@
     "@types/workbox-sw": "3.2.0",
     "babel-plugin-filter-imports": "2.0.3",
     "chai": "4.2.0",
+    "chalk": "2.4.1",
     "chromedriver": "2.42.0",
     "esm": "^3.0.84",
     "esm_prateek": "^1.1.0",
@@ -43,7 +49,7 @@
     "npm-run": "5.0.1",
     "prettier": "1.14.3",
     "promisify": "0.0.3",
-    "puppeteer": "^1.10.0",
+    "puppeteer": "1.11.0",
     "rollup": "0.66.6",
     "rollup-plugin-babel": "4.0.3",
     "rollup-plugin-node-resolve": "3.4.0",
