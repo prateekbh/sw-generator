@@ -18,7 +18,7 @@ import {argv} from 'yargs';
 import { getDevices, getDeviceAddress } from "../device";
 import puppeteer from "puppeteer";
 import chalk from 'chalk';
-const {yellow} = chalk;
+const {yellow, red} = chalk;
 
 export async function getBrowser() {
   let browser;
@@ -29,6 +29,11 @@ export async function getBrowser() {
     });
   } else {
     const devices = await getDevices(console);
+    if (!devices || devices.length === 0) {
+      const errorMsg = 'No connected device found.';
+      console.log(red(errorMsg))
+      throw new Error(errorMsg);
+    }
     const device = devices[0].id;
     const address = await getDeviceAddress({ device, logger: console });
     if (!address || address.length === 0) {

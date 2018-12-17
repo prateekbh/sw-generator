@@ -15,36 +15,40 @@
  */
 
 import chalk from 'chalk';
-const {yellow} = chalk;
+const {yellow, red} = chalk;
 
 export async function getFetchStats(page, fetchUrl, runs) {
   const results = [];
   const startTime = Date.now();
   for (let count = 0; count < runs; count++) {
     console.log(yellow(`Starting fetch test run ${count + 1} of ${runs}`));
-    // put the url in cache
-    await page.evaluate(async fetchUrl => {
-      await fetch(fetchUrl);
-    }, fetchUrl);
-    const preTiming = await page.evaluate(async fetchUrl => {
-      await fetch(fetchUrl);
-      const entries = performance
-        .getEntriesByType("resource")
-        .filter(entry => entry.initiatorType === "fetch");
-      return JSON.stringify(entries[entries.length - 1]);
-    }, fetchUrl);
-    await page._client.send("ServiceWorker.stopAllWorkers"); // stops the service worker
-    const postTiming = await page.evaluate(async fetchUrl => {
-      await fetch(fetchUrl);
-      const entries = performance
-        .getEntriesByType("resource")
-        .filter(entry => entry.initiatorType === "fetch");
-      return JSON.stringify(entries[entries.length - 1]);
-    }, fetchUrl);
-    results.push({
-      preTiming: JSON.parse(preTiming),
-      postTiming: JSON.parse(postTiming)
-    });
+    try {
+      // put the url in cache
+      await page.evaluate(async fetchUrl => {
+        await fetch(fetchUrl);
+      }, fetchUrl);
+      const preTiming = await page.evaluate(async fetchUrl => {
+        await fetch(fetchUrl);
+        const entries = performance
+          .getEntriesByType("resource")
+          .filter(entry => entry.initiatorType === "fetch");
+        return JSON.stringify(entries[entries.length - 1]);
+      }, fetchUrl);
+      await page._client.send("ServiceWorker.stopAllWorkers"); // stops the service worker
+      const postTiming = await page.evaluate(async fetchUrl => {
+        await fetch(fetchUrl);
+        const entries = performance
+          .getEntriesByType("resource")
+          .filter(entry => entry.initiatorType === "fetch");
+        return JSON.stringify(entries[entries.length - 1]);
+      }, fetchUrl);
+      results.push({
+        preTiming: JSON.parse(preTiming),
+        postTiming: JSON.parse(postTiming)
+      });
+    } catch (e) {
+      console.log(red(`Failed fetch test run ${count + 1} of ${runs}`));
+    }
   }
   console.log(yellow(`Run completed in ${Date.now() - startTime}ms.`));
   return results;
