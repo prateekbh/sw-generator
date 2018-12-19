@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { sh } from './util';
+import { sh } from './utils/utils';
 
 async function adb (command, { device, logger }) {
   let cmd = 'adb ';

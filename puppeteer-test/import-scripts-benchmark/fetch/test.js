@@ -14,8 +14,41 @@
  * limitations under the License.
  */
 
+
+
+import { argv } from "yargs";
+import { getBrowser, preparePage } from "../utils/utils";
+import { sleep } from "../utils/utils";
 import chalk from 'chalk';
+import * as fs from 'fs';
+import {promisify} from 'util';
+const writeFile = promisify(fs.writeFile);
+
 const {yellow, red} = chalk;
+
+(async function() {
+  const options = {
+    runs: argv.runs || 1000,
+    site: argv.site,
+    url: argv.url,
+    out: argv.out || 'results.json'
+  };
+  if (!options.url) {
+    throw new Error('No Test URL specified.');
+  }
+  if (!options.site) {
+    throw new Error('No Test Site specified.');
+  }
+
+  console.log(yellow('Connecting to browser.'));
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  console.log(yellow('Preparing page by installing service worker.'));
+  await preparePage(page, options.site);
+  const stats = await getFetchStats(page, options.url, options.runs);
+  await writeFile(options.out, JSON.stringify(stats));
+  process.exit(0);
+})();
 
 /**
  * Runs a fetch with a woken up sw and then
@@ -66,10 +99,4 @@ export async function getFetchStats(page, fetchUrl, runs) {
   }
   console.log(yellow(`Run completed in ${Date.now() - startTime}ms.`));
   return results;
-}
-
-async function sleep(delay) {
-  return new Promise(resolve => {
-    setTimeout(resolve, delay);
-  })
 }
