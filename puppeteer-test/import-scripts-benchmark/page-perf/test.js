@@ -15,7 +15,7 @@
  */
 
 import { argv } from "yargs";
-import { getBrowser, preparePage } from "../utils/utils";
+import { getBrowser, preparePage, sleep } from "../utils/utils";
 import chalk from "chalk";
 import * as fs from "fs";
 import { promisify } from "util";
@@ -59,6 +59,7 @@ async function getPagePerfStats(page, pageUrl, runs) {
     try {
       // reload page and capture stats
       await page.reload({
+        timeout: 5000,
         waitUntil: "load"
       });
       const preKillResult = await page.evaluate(async () => {
@@ -74,6 +75,7 @@ async function getPagePerfStats(page, pageUrl, runs) {
       await page._client.send("ServiceWorker.stopAllWorkers"); // stops the service worker
       // reload page and re-capture stats
       await page.reload({
+        timeout: 5000,
         waitUntil: "load"
       });
       const postKillResult = await page.evaluate(async () => {

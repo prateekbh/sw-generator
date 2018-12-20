@@ -16,6 +16,7 @@
     "benchmark:cachefirst:nonimportscript": "node -r esm_prateek ./puppeteer-test/import-scripts-benchmark/fetch/test.js --site='https://nonimportscript.surge.sh/' --url='/cache.json' --runs=1000 --out='result-cache-nonimport.json'",
     "benchmark:networkfirst:importscript": "node -r esm_prateek ./puppeteer-test/import-scripts-benchmark/fetch/test.js --site='https://importscript.surge.sh/' --url='/network.json' --runs=1000 --out='result-network-import.json'",
     "benchmark:networkfirst:nonimportscript": "node -r esm_prateek ./puppeteer-test/import-scripts-benchmark/fetch/test.js --site='https://nonimportscript.surge.sh/' --url='/network.json' --runs=1000 --out='result-network-nonimport.json'",
+    "benchmark:pageperf:nonimportscript": "node -r esm_prateek ./puppeteer-test/import-scripts-benchmark/page-perf/test.js --site='https://nonimportscript.surge.sh/' --url='/' --runs=1000 --out='result-pageperf-nonimport.json'",
     "benchmark:importscript": "npm run benchmark:cachefirst:importscript && npm run benchmark:cachefirst:nonimportscript && npm run benchmark:networkfirst:importscript && npm run benchmark:networkfirst:nonimportscript"
   },
   "repository": {
