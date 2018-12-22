@@ -80,21 +80,3 @@ if (__REPLACE_CONFIG_offlinePageOptions.url) {
     __REPLACE_CONFIG_offlinePageOptions.assets || [],
   );
 }
-
-// Taking over the document
-
-self.addEventListener('install', function(e: ExtendableEvent) {
-  const { skipWaiting } = self as ServiceWorkerGlobalScope;
-  e.waitUntil(skipWaiting());
-});
-
-self.addEventListener('activate', async (e: ExtendableEvent) => {
-  const { clients } = self as ServiceWorkerGlobalScope;
-  e.waitUntil(
-    clients.claim().then(async () => {
-      // Cache current document if its AMP.
-      const windowClients = await clients.matchAll({ type: 'window' });
-      return Promise.all(cacheAMPDocument(windowClients));
-    }),
-  );
-});
