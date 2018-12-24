@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { AmpCachingModule } from '../amp-caching/index';
 import { DocumentCachingModule } from '../document-caching/index';
 import { AmpSwModule } from './AmpSwModule';
 import { ServiceWorkerConfiguration } from '../../configuration';
-
 declare global {
   interface WorkerGlobalScope {
     AMP_SW: {
@@ -69,8 +67,9 @@ self['AMP_SW'] = {
 };
 
 const ampCachingModule = new AmpCachingModule();
-const documentCachingModule = new DocumentCachingModule();
 registerModule(ampCachingModule.constructor.name, ampCachingModule);
+
+const documentCachingModule = new DocumentCachingModule();
 registerModule(documentCachingModule.constructor.name, documentCachingModule);
 
 // Taking over the document

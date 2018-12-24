@@ -25,6 +25,7 @@ import {
 // @ts-ignore
 import { Plugin } from 'workbox-cache-expiration';
 import { cacheName } from './constants';
+import { AmpSwModule } from '../core/AmpSwModule';
 
 export type AssetCachingOptions = Array<{
   regexp: RegExp;
@@ -69,32 +70,39 @@ class AssetCachingPlugin extends Plugin {
     return cachableResponse;
   }
 }
+class AssetCachingAmpModule implements AmpSwModule {
+  init(assetCachingOptions: AssetCachingOptions) {
+    assetCachingOptions.forEach(assetCachingOption => {
+      let cachingStrategy = null;
+      const cachingConfig = {
+        cacheName,
+        plugins: [
+          new AssetCachingPlugin({
+            maxEntries: 25,
+            denyList: assetCachingOption.denyList,
+          }),
+        ],
+      };
 
-export function cacheAssets(assetCachingOptions: AssetCachingOptions) {
-  assetCachingOptions.forEach(assetCachingOption => {
-    let cachingStrategy = null;
-    const cachingConfig = {
-      cacheName,
-      plugins: [
-        new AssetCachingPlugin({
-          maxEntries: 25,
-          denyList: assetCachingOption.denyList,
-        }),
-      ],
-    };
+      switch (assetCachingOption.cachingStrategy) {
+        case 'NETWORK_FIRST':
+          cachingStrategy = new NetworkFirst(cachingConfig);
+          break;
+        case 'STALE_WHILE_REVALIDATE':
+          cachingStrategy = new StaleWhileRevalidate(cachingConfig);
+          break;
+        default:
+          cachingStrategy = new CacheFirst(cachingConfig);
+          break;
+      }
 
-    switch (assetCachingOption.cachingStrategy) {
-      case 'NETWORK_FIRST':
-        cachingStrategy = new NetworkFirst(cachingConfig);
-        break;
-      case 'STALE_WHILE_REVALIDATE':
-        cachingStrategy = new StaleWhileRevalidate(cachingConfig);
-        break;
-      default:
-        cachingStrategy = new CacheFirst(cachingConfig);
-        break;
-    }
-
-    router.registerRoute(assetCachingOption.regexp, cachingStrategy);
-  });
+      router.registerRoute(assetCachingOption.regexp, cachingStrategy);
+    });
+  }
 }
+
+const assetCachingAmpModule = new AssetCachingAmpModule();
+self['AMP_SW'].registerModule(
+  assetCachingAmpModule.constructor.name,
+  assetCachingAmpModule,
+);
