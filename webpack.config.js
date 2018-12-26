@@ -17,7 +17,7 @@ const babelOptions = {
   plugins: ['@babel/plugin-syntax-dynamic-import']
 };
 
-const buildPath = `${__dirname}/lib`;
+const buildPath = `${__dirname}/dist`;
 
 module.exports = {
   entry: {

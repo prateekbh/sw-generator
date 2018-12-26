@@ -30,11 +30,12 @@ export async function buildSW(
     importFrom = 'https://cdn.ampproject.org/amp-sw.js';
   }
   if (config.offlinePageOptions && config.offlinePageOptions.url) {
+    config.offlinePageOptions.assets = config.offlinePageOptions.assets || [];
     config.offlinePageOptions.assets = config.offlinePageOptions.assets.concat(
       await fetchRequiredAssetsForUrl(config.offlinePageOptions.url),
     );
   }
   code = `importScript('${importFrom}')\n`;
-  code = `AMP_SW.init({${serializeObject(config)}})`;
+  code += `AMP_SW.init(${serializeObject(config || {})})`;
   return code;
 }

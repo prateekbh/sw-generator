@@ -65,6 +65,7 @@ typings/
 
 # project output folders
 lib
+dist
 build
 
 #generated service workers in test and sample folder
