@@ -15,77 +15,81 @@
  */
 import { AmpCachingModule } from '../amp-caching/index';
 import { DocumentCachingModule } from '../document-caching/index';
-import { AmpSwModule } from './AmpSwModule';
 import { ServiceWorkerConfiguration } from '../../configuration';
+import { AssetCachingOptions } from '../asset-caching';
+import { LinkPrefetchOptions } from '../link-prefetch';
+import { OfflinePageOptions } from '../offline-page';
 declare global {
   interface WorkerGlobalScope {
     AMP_SW: {
-      modules: AmpSWModules;
-      registerModule: Function;
       init: Function;
     };
   }
 }
 
-interface AmpSWModules {
-  [key: string]: AmpSwModule;
-}
+const ampCachingModule = new AmpCachingModule();
+const documentCachingModule = new DocumentCachingModule();
 
 function init(config: ServiceWorkerConfiguration) {
-  // Initialize all registered modules.
-  const { modules } = self.AMP_SW;
-  for (const moduleKey in modules) {
-    const module = modules[moduleKey];
-    const moduleConfig = getModuleConfig(config, moduleKey);
-    module.init(moduleConfig);
+  ampCachingModule.init();
+  const navRoute = documentCachingModule.init(config.documentCachingOptions);
+  if (config.assetCachingOptions) {
+    import(/* webpackChunkName: "optional-modules" */ '../asset-caching/index').then(
+      async ({ AssetCachingAmpModule }) => {
+        const assetCachingModule = new AssetCachingAmpModule();
+        await assetCachingModule.init(
+          config.assetCachingOptions as AssetCachingOptions,
+        );
+      },
+    );
   }
-}
 
-function getModuleConfig(
-  config: ServiceWorkerConfiguration,
-  moduleKey: string,
-) {
-  switch (moduleKey) {
-    case 'DocumentCachingOptions':
-      return config.documentCachingOptions;
-    case 'AssetCachingOptions':
-      return config.assetCachingOptions;
-    default:
-      return;
+  if (config.linkPrefetchOptions) {
+    import(/* webpackChunkName: "optional-modules" */ '../link-prefetch/index').then(
+      async ({ LinkPrefetchAmpModule }) => {
+        const linkPrefetchModule = new LinkPrefetchAmpModule();
+        await linkPrefetchModule.init(
+          config.linkPrefetchOptions as LinkPrefetchOptions,
+          navRoute,
+        );
+      },
+    );
   }
-}
 
-function registerModule(moduleName: string, module: AmpSwModule) {
-  self['AMP_SW'].modules[moduleName] = module;
+  if (config.offlinePageOptions) {
+    import(/* webpackChunkName: "optional-modules" */ '../offline-page/index').then(
+      async ({ OfflinePageAmpSwModule }) => {
+        const offlinePageModule = new OfflinePageAmpSwModule();
+        const offlinePageConfig: OfflinePageOptions = config.offlinePageOptions as OfflinePageOptions;
+        await offlinePageModule.init(
+          offlinePageConfig.url,
+          offlinePageConfig.assets,
+        );
+      },
+    );
+  }
+
+  // Taking over the document
+  self.addEventListener('install', function(e: ExtendableEvent) {
+    const { skipWaiting } = self as ServiceWorkerGlobalScope;
+    e.waitUntil(skipWaiting());
+  });
+
+  self.addEventListener('activate', async (e: ExtendableEvent) => {
+    const { clients } = self as ServiceWorkerGlobalScope;
+    e.waitUntil(
+      clients.claim().then(async () => {
+        // Cache current document if its AMP.
+        const windowClients = await clients.matchAll({ type: 'window' });
+        return Promise.all(
+          documentCachingModule.cacheAMPDocument(windowClients),
+        );
+      }),
+    );
+  });
 }
 
 // Initialize AMP_SW namespace
 self['AMP_SW'] = {
-  modules: {},
   init,
-  registerModule,
 };
-
-const ampCachingModule = new AmpCachingModule();
-registerModule(ampCachingModule.constructor.name, ampCachingModule);
-
-const documentCachingModule = new DocumentCachingModule();
-registerModule(documentCachingModule.constructor.name, documentCachingModule);
-
-// Taking over the document
-
-self.addEventListener('install', function(e: ExtendableEvent) {
-  const { skipWaiting } = self as ServiceWorkerGlobalScope;
-  e.waitUntil(skipWaiting());
-});
-
-self.addEventListener('activate', async (e: ExtendableEvent) => {
-  const { clients } = self as ServiceWorkerGlobalScope;
-  e.waitUntil(
-    clients.claim().then(async () => {
-      // Cache current document if its AMP.
-      const windowClients = await clients.matchAll({ type: 'window' });
-      return Promise.all(documentCachingModule.cacheAMPDocument(windowClients));
-    }),
-  );
-});

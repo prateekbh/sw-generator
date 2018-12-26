@@ -16,17 +16,21 @@
 
 import { cacheName as documentCache } from '../document-caching/constants';
 import { cacheName as assetCache } from '../asset-caching/constants';
+import { AmpSwModule } from '../core/AmpSwModule';
 
 export type OfflinePageOptions = {
   url: string;
+  assets: Array<string>;
 };
 
-export async function installOfflinePage(url: string, assets: Array<string>) {
-  const publisherCache = await caches.open(documentCache);
-  const assetsCache = await caches.open(assetCache);
-  const response = await fetch(url);
-  if (response.ok) {
-    await publisherCache.put(new Request(url), response);
-    await assetsCache.addAll(assets);
+export class OfflinePageAmpSwModule implements AmpSwModule {
+  async init(url: string, assets: Array<string>) {
+    const publisherCache = await caches.open(documentCache);
+    const assetsCache = await caches.open(assetCache);
+    const response = await fetch(url);
+    if (response.ok) {
+      await publisherCache.put(new Request(url), response);
+      await assetsCache.addAll(assets);
+    }
   }
 }

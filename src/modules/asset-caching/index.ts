@@ -70,7 +70,7 @@ class AssetCachingPlugin extends Plugin {
     return cachableResponse;
   }
 }
-class AssetCachingAmpModule implements AmpSwModule {
+export class AssetCachingAmpModule implements AmpSwModule {
   init(assetCachingOptions: AssetCachingOptions) {
     assetCachingOptions.forEach(assetCachingOption => {
       let cachingStrategy = null;
@@ -100,9 +100,3 @@ class AssetCachingAmpModule implements AmpSwModule {
     });
   }
 }
-
-const assetCachingAmpModule = new AssetCachingAmpModule();
-self['AMP_SW'].registerModule(
-  assetCachingAmpModule.constructor.name,
-  assetCachingAmpModule,
-);

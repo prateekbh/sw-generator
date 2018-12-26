@@ -29,56 +29,6 @@ const UNVERSIONED_EXTENSIONS_RE = /^https:\/\/cdn.ampproject.org\/v0\//;
 const UNVERSIONED_CACHE_NAME = 'AMP-UNVERSIONED-CACHE';
 const VERSIONED_CACHE_NAME = 'AMP-VERSIONED-CACHE';
 
-function ampAssetsCaching() {
-  // Versioned Assets
-  router.registerRoute(
-    VERSIONED_ASSETS_RE,
-    new CacheFirst({
-      cacheName: VERSIONED_CACHE_NAME,
-      plugins: [
-        new Plugin({
-          maxAgeSeconds: 14 * 24 * 60 * 60, // 14 days
-        }),
-      ],
-    }),
-  );
-
-  // Unversioned runtimes
-  router.registerRoute(
-    UNVERSIONED_RUNTIME_RE,
-    new StaleWhileRevalidate({
-      cacheName: UNVERSIONED_CACHE_NAME,
-      plugins: [
-        new Plugin({
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        }),
-      ],
-    }),
-  );
-
-  // Unversioned Extensions
-  router.registerRoute(
-    UNVERSIONED_EXTENSIONS_RE,
-    new StaleWhileRevalidate({
-      cacheName: UNVERSIONED_CACHE_NAME,
-      plugins: [
-        new Plugin({
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        }),
-      ],
-    }),
-  );
-}
-
-function listenForFetchedScripts(): void {
-  self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
-    const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
-    if (data.type === 'AMP__FIRST-VISIT-CACHING' && data.payload) {
-      messageEvent.waitUntil(cachePreRequestedScripts(data.payload));
-    }
-  });
-}
-
 async function cachePreRequestedScripts(scripts: Array<string>) {
   const unversionedScripts: Array<Request> = [];
   const versionedScripts: Array<Request> = [];
@@ -100,7 +50,57 @@ async function cachePreRequestedScripts(scripts: Array<string>) {
 
 export class AmpCachingModule implements AmpSwModule {
   init() {
-    ampAssetsCaching();
-    listenForFetchedScripts();
+    this.ampAssetsCaching();
+    this.listenForFetchedScripts();
+  }
+
+  ampAssetsCaching() {
+    // Versioned Assets
+    router.registerRoute(
+      VERSIONED_ASSETS_RE,
+      new CacheFirst({
+        cacheName: VERSIONED_CACHE_NAME,
+        plugins: [
+          new Plugin({
+            maxAgeSeconds: 14 * 24 * 60 * 60, // 14 days
+          }),
+        ],
+      }),
+    );
+
+    // Unversioned runtimes
+    router.registerRoute(
+      UNVERSIONED_RUNTIME_RE,
+      new StaleWhileRevalidate({
+        cacheName: UNVERSIONED_CACHE_NAME,
+        plugins: [
+          new Plugin({
+            maxAgeSeconds: 24 * 60 * 60, // 1 day
+          }),
+        ],
+      }),
+    );
+
+    // Unversioned Extensions
+    router.registerRoute(
+      UNVERSIONED_EXTENSIONS_RE,
+      new StaleWhileRevalidate({
+        cacheName: UNVERSIONED_CACHE_NAME,
+        plugins: [
+          new Plugin({
+            maxAgeSeconds: 24 * 60 * 60, // 1 day
+          }),
+        ],
+      }),
+    );
+  }
+
+  listenForFetchedScripts(): void {
+    self.addEventListener('message', (messageEvent: ExtendableMessageEvent) => {
+      const data: FluxStandardAction<[string]> = JSON.parse(messageEvent.data);
+      if (data.type === 'AMP__FIRST-VISIT-CACHING' && data.payload) {
+        messageEvent.waitUntil(cachePreRequestedScripts(data.payload));
+      }
+    });
   }
 }

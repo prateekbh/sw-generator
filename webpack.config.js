@@ -1,5 +1,7 @@
 const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 const SizePlugin = require('size-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const babelOptions = {
   presets: [
@@ -12,20 +14,23 @@ const babelOptions = {
       }
     ]
   ],
+  plugins: ['@babel/plugin-syntax-dynamic-import']
 };
+
+const buildPath = `${__dirname}/lib`;
 
 module.exports = {
   entry: {
     'core': './src/modules/core/index.ts',
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: buildPath,
     filename: '[name].js',
-    chunkFilename: '[id].chunk.js',
+    chunkFilename: '[name].chunk.js',
     publicPath: '/dist',
   },
   target: "webworker",
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {
@@ -50,12 +55,18 @@ module.exports = {
     ]
   },
   plugins: [
-    new SizePlugin()
+    new SizePlugin(),
+    new CleanWebpackPlugin([buildPath]),
   ],
-  optimization: {
-    minimize: false
-  },
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
+  },
+  optimization: {
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        ecma: 6,
+        module: true,
+      }
+    })],
   },
 }
