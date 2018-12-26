@@ -2,6 +2,8 @@ const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const SizePlugin = require('size-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin');
+const {argv} = require('yargs');
 
 const babelOptions = {
   presets: [
@@ -18,6 +20,7 @@ const babelOptions = {
 };
 
 const buildPath = `${__dirname}/dist`;
+const publicPath = argv.publicPath || '/dist';
 
 module.exports = {
   entry: {
@@ -27,7 +30,7 @@ module.exports = {
     path: buildPath,
     filename: '[name].js',
     chunkFilename: '[name].js',
-    publicPath: '/dist',
+    publicPath,
   },
   target: "webworker",
   mode: "production",
@@ -57,6 +60,14 @@ module.exports = {
   plugins: [
     new SizePlugin(),
     new CleanWebpackPlugin([buildPath]),
+    new ReplaceInFileWebpackPlugin([{
+      dir: 'dist',
+      files: ['core.js'],
+      rules: [{
+        search: 'importScripts(({',
+        replace: `importScripts('${publicPath}' + ({`,
+      }],
+    }]),
   ],
   resolve: {
     extensions: ['.ts', '.tsx', '.js']

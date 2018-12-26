@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "pretest": "npm run transpile && npm run build && mkdir -p test/dist && cp -R dist/* test/dist",
+    "pretest": "npm run transpile && npm run build -- --public-path='/test/dist/' && mkdir -p test/dist && cp -R dist/* test/dist",
     "transpile": "tsc -p ./src/tsconfig.json",
     "test": "node -r esm_prateek ./test/index.js",
     "posttest": "npm run test:perf",
@@ -52,6 +52,7 @@
     "prettier": "1.14.3",
     "promisify": "0.0.3",
     "puppeteer": "^1.10.0",
+    "replace-in-file-webpack-plugin": "^1.0.6",
     "selenium-assistant": "5.3.0",
     "serve-handler": "^5.0.7",
     "size-plugin": "^1.1.1",
