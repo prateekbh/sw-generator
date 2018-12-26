@@ -88,7 +88,7 @@ describe('Asset caching module', function() {
 });
 
 async function generateSWAndRegister(driver, swConfig) {
-  const generatedSW = await buildSW(swConfig);
+  const generatedSW = await buildSW(swConfig, '/test/dist/core.js');
   await writeFile(serviceWorkerPath, generatedSW);
   await driver.get('http://localhost:6881/test/index.html');
   await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
