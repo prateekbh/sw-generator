@@ -14,109 +14,27 @@
  * limitations under the License.
  */
 
-import { join } from 'path';
-import { rollup } from 'rollup';
 import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
-import getBabelConfig from './babel';
 import { fetchRequiredAssetsForUrl } from './asset-gatherer';
-
-// @ts-ignore
-import npmRun from 'npm-run';
-// @ts-ignore
-import replace from 'rollup-plugin-re';
-// @ts-ignore
-import resolve from 'rollup-plugin-node-resolve';
-// @ts-ignore
-import babel from 'rollup-plugin-babel';
-const compiler = require('@ampproject/rollup-plugin-closure-compiler');
+const { argv } = require('yargs');
 
 export async function buildSW(
-  {
-    documentCachingOptions,
-    assetCachingOptions,
-    linkPrefetchOptions,
-    offlinePageOptions,
-    mode,
-  }: ServiceWorkerConfiguration = {
+  config: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
-    mode: 'production',
   },
 ) {
-  // Would like to use the TSC JavaScript API, but it is not stable yet.
-  // https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
-  // Until then, use npm to transpile Typescript into a temp directory.
-  npmRun.sync(`tsc -p ./src/tsconfig.json`);
-
-  const replacePatterns = [
-    {
-      test: 'process.env.NODE_ENV',
-      replace: `'${mode || 'production'}'`,
-    },
-  ];
-
-  if (documentCachingOptions) {
-    replacePatterns.push({
-      test: '__REPLACE_CONFIG_documentCachingOptions = {}',
-      replace: `__REPLACE_CONFIG_documentCachingOptions = ${serializeObject(
-        documentCachingOptions,
-      )}`,
-    });
+  let code = '';
+  let { importFrom } = argv;
+  if (!importFrom) {
+    importFrom = 'https://cdn.ampproject.org/amp-sw.js';
   }
-
-  if (assetCachingOptions) {
-    replacePatterns.push({
-      test: '__REPLACE_CONFIG_assetCachingOptions = []',
-      replace: `__REPLACE_CONFIG_assetCachingOptions = ${serializeObject(
-        assetCachingOptions,
-      )}`,
-    });
+  if (config.offlinePageOptions && config.offlinePageOptions.url) {
+    config.offlinePageOptions.assets = config.offlinePageOptions.assets.concat(
+      await fetchRequiredAssetsForUrl(config.offlinePageOptions.url),
+    );
   }
-
-  if (linkPrefetchOptions) {
-    replacePatterns.push({
-      test: '__REPLACE_CONFIG_isLinkPrefetchOptions = undefined',
-      replace: `__REPLACE_CONFIG_isLinkPrefetchOptions = ${serializeObject(
-        linkPrefetchOptions,
-      )}`,
-    });
-  }
-
-  if (offlinePageOptions && offlinePageOptions.url) {
-    replacePatterns.push({
-      test: '__REPLACE_CONFIG_offlinePageOptions = {}',
-      replace: `__REPLACE_CONFIG_offlinePageOptions = ${serializeObject({
-        url: offlinePageOptions.url,
-        assets: await fetchRequiredAssetsForUrl(offlinePageOptions.url),
-      })}`,
-    });
-  }
-
-  const babelConfig = getBabelConfig({
-    documentCachingOptions,
-    assetCachingOptions,
-  });
-
-  // rollup the files in the tempdir
-  const bundle = await rollup({
-    input: join('lib', 'modules', 'index.js'),
-    plugins: [
-      resolve({}),
-      babel(babelConfig),
-      replace({
-        patterns: replacePatterns,
-      }),
-      mode === 'production' &&
-        compiler({
-          compilation_level: 'simple',
-        }),
-    ],
-  });
-  const { code } = await bundle.generate({
-    name: 'AmpServiceWorker',
-    format: 'es',
-    sourcemap: true,
-  });
-
+  code = `importScript('${importFrom}')\n`;
+  code = `AMP_SW.init({${serializeObject(config)}})`;
   return code;
 }
