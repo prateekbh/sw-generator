@@ -28,7 +28,7 @@ describe('AMP caching module', function() {
   const serviceWorkerPath = join('test', 'amp-caching-sw.js');
 
   before(async () => {
-    const generatedSW = await buildSW({});
+    const generatedSW = await buildSW({}, '/test/dist/core.js');
     await writeFile(serviceWorkerPath, generatedSW);
   });
 

@@ -26,7 +26,7 @@ module.exports = {
   output: {
     path: buildPath,
     filename: '[name].js',
-    chunkFilename: '[name].chunk.js',
+    chunkFilename: '[name].js',
     publicPath: '/dist',
   },
   target: "webworker",

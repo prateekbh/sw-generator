@@ -26,7 +26,7 @@ const writeFile = promisify(fs.writeFile);
       offlinePageOptions: {
         url: 'http://localhost:8080/menu/offline.html'
       }
-    });
+    }, "./dist/core.js");
     await writeFile(path.join(__dirname, 'Blog', 'amp-sw.js'), serviceWorker);
     await writeFile(path.join(__dirname, 'Menu', 'amp-sw.js'), serviceWorker);
   });

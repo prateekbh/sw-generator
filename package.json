@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "transpile": "tsc -p ./src/tsconfig.json",
     "build": "webpack",
-    "pretest": "npm run transpile",
+    "pretest": "npm run transpile && npm run build && mkdir -p test/dist && cp -R dist/* test/dist",
+    "transpile": "tsc -p ./src/tsconfig.json",
     "test": "node -r esm_prateek ./test/index.js",
     "posttest": "npm run test:perf",
     "test:perf": "mocha ./puppeteer-test/amp-caching-module-test.js  -t 30000 --exit",
     "start": "node -r esm_prateek ./index.js",
-    "presample": "npm run transpile",
+    "presample": "npm run transpile && npm run sample:clean && npm run build && npm run sample:prepare",
+    "sample:clean": "rm -rf sample/**/dist && rm -rf sample/**/amp-sw.js",
+    "sample:prepare": "mkdir -p sample/menu/dist && mkdir -p sample/blog/dist && cp -R dist/* sample/menu/dist && cp -R dist/* sample/blog/dist",
     "sample": "node -r esm_prateek ./sample/serve.js"
   },
   "repository": {

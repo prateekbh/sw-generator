@@ -17,25 +17,21 @@
 import { serializeObject } from './serialize';
 import { ServiceWorkerConfiguration } from '../configuration';
 import { fetchRequiredAssetsForUrl } from './asset-gatherer';
-const { argv } = require('yargs');
 
 export async function buildSW(
   config: ServiceWorkerConfiguration = {
     documentCachingOptions: {},
   },
+  importFrom: string = 'https://cdn.ampproject.org/amp-sw.js',
 ) {
   let code = '';
-  let { importFrom } = argv;
-  if (!importFrom) {
-    importFrom = 'https://cdn.ampproject.org/amp-sw.js';
-  }
   if (config.offlinePageOptions && config.offlinePageOptions.url) {
     config.offlinePageOptions.assets = config.offlinePageOptions.assets || [];
     config.offlinePageOptions.assets = config.offlinePageOptions.assets.concat(
       await fetchRequiredAssetsForUrl(config.offlinePageOptions.url),
     );
   }
-  code = `importScript('${importFrom}')\n`;
+  code = `importScripts('${importFrom}')\n`;
   code += `AMP_SW.init(${serializeObject(config || {})})`;
   return code;
 }
