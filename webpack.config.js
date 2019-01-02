@@ -20,7 +20,7 @@ const babelOptions = {
 };
 
 const buildPath = `${__dirname}/dist`;
-const publicPath = argv.publicPath || '/dist';
+const publicPath = argv.publicPath || './dist/';
 
 module.exports = {
   entry: {
