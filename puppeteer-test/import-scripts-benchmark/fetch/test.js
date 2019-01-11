@@ -63,7 +63,7 @@ export async function getFetchStats(page, fetchUrl, runs) {
   const startTime = Date.now();
   for (let count = 0; count < runs; count++) {
     if (count > 0 && count % 50 === 0) {
-      console.log(yellow('Sleeping for 2s'));
+      console.log(yellow('Sleeping for 10s'));
       await sleep(10000); // wait after every 50th run to avoid heat throttling
       await page.reload({
         waitUntil: 'load'
@@ -82,7 +82,6 @@ export async function getFetchStats(page, fetchUrl, runs) {
           .filter(entry => entry.initiatorType === "fetch");
         return JSON.stringify(entries[entries.length - 1]);
       }, fetchUrl));
-      preKillTiming['sw-state'] = "awake";
       await page._client.send("ServiceWorker.stopAllWorkers"); // stops the service worker
       const postKillTiming = JSON.parse(await page.evaluate(async fetchUrl => {
         await fetch(fetchUrl);
@@ -91,13 +90,17 @@ export async function getFetchStats(page, fetchUrl, runs) {
           .filter(entry => entry.initiatorType === "fetch");
         return JSON.stringify(entries[entries.length - 1]);
       }, fetchUrl));
-      preKillTiming['sw-state'] = "slept";
+      if(preKillTiming.workerStart === 0 || postKillTiming.workerStart === 0) {
+        throw new Error('Test failed since service worker, did not intercept this request');
+      }
+      console.log(chalk.green(`Fetch test run ${count + 1} of ${runs} succeeded`));
       results.push({
         preKillTiming: preKillTiming,
         postKillTiming: postKillTiming,
       });
     } catch (e) {
       console.log(red(`Failed fetch test run ${count + 1} of ${runs}`));
+      console.log(e.message);
     }
   }
   console.log(yellow(`Run completed in ${Date.now() - startTime}ms.`));
