@@ -77,6 +77,7 @@ export async function preparePage(page, url) {
   await page.reload({
     waitUntil: "load"
   });
+  await page.setCacheEnabled(false);
   await page.evaluate(async () => {
     return new Promise((resolve, reject) => {
       navigator.serviceWorker.register("/amp-sw.js").then(registration => {

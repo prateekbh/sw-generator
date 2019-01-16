@@ -21,7 +21,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 const writeFile = promisify(fs.writeFile);
 
-const { yellow } = chalk;
+const { red, yellow, green } = chalk;
 
 (async function() {
   const options = {
@@ -51,9 +51,9 @@ async function getPagePerfStats(page, pageUrl, runs) {
   const results = [];
   const startTime = Date.now();
   for (let count = 0; count < runs; count++) {
-    if (count > 0 && count % 10 === 0) {
-      console.log(yellow("Sleeping for 2s"));
-      await sleep(2000); // wait after every 10th run to avoid heat throttling
+    if (count > 0 && count % 50 === 0) {
+      console.log(yellow("Sleeping for 10s"));
+      await sleep(10000); // wait after every 10th run to avoid heat throttling
     }
     console.log(yellow(`Starting page-perf test run ${count + 1} of ${runs}`));
     try {
@@ -62,7 +62,7 @@ async function getPagePerfStats(page, pageUrl, runs) {
         timeout: 5000,
         waitUntil: "load"
       });
-      const preKillResult = await page.evaluate(async () => {
+      const preKillTiming = await page.evaluate(async () => {
         const items = performance
           .getEntriesByType("mark")
           .filter(item =>
@@ -78,7 +78,7 @@ async function getPagePerfStats(page, pageUrl, runs) {
         timeout: 5000,
         waitUntil: "load"
       });
-      const postKillResult = await page.evaluate(async () => {
+      const postKillTiming = await page.evaluate(async () => {
         const items = performance
           .getEntriesByType("mark")
           .filter(item =>
@@ -89,11 +89,12 @@ async function getPagePerfStats(page, pageUrl, runs) {
         }, {});
       });
       results.push({
-        preKillResult,
-        postKillResult
+        preKillTiming,
+        postKillTiming
       });
+      console.log(green(`Success page-perf test run ${count + 1} of ${runs}`));
     } catch (e) {
-      console.log(yellow(`Failed page-perf test run ${count + 1} of ${runs}`));
+      console.log(red(`Failed page-perf test run ${count + 1} of ${runs}`));
     }
   }
   console.log(yellow(`Run completed in ${Date.now() - startTime}ms.`));

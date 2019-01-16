@@ -62,15 +62,16 @@ export async function getFetchStats(page, fetchUrl, runs) {
   const results = [];
   const startTime = Date.now();
   for (let count = 0; count < runs; count++) {
-    if (count > 0 && count % 50 === 0) {
-      console.log(yellow('Sleeping for 10s'));
-      await sleep(10000); // wait after every 50th run to avoid heat throttling
-      await page.reload({
-        waitUntil: 'load'
-      });
-    }
-    console.log(yellow(`Starting fetch test run ${count + 1} of ${runs}`));
     try {
+      if (count > 0 && count % 50 === 0) {
+        console.log(yellow('Sleeping for 10s'));
+        await sleep(10000); // wait after every 50th run to avoid heat throttling
+        await page.reload({
+          waitUntil: 'load'
+        });
+        await page.setCacheEnabled(false);
+      }
+      console.log(yellow(`Starting fetch test run ${count + 1} of ${runs}`));
       // put the url in cache
       await page.evaluate(async fetchUrl => {
         await fetch(fetchUrl);
