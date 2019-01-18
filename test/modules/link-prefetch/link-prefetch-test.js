@@ -28,9 +28,12 @@ describe('Link prefetch module', function() {
   const serviceWorkerPath = join('test', 'link-prefetch-sw.js');
 
   before(async () => {
-    const generatedSW = await buildSW({
-      linkPrefetchOptions: {},
-    });
+    const generatedSW = await buildSW(
+      {
+        linkPrefetchOptions: {},
+      },
+      '/test/dist/core.js',
+    );
     await writeFile(serviceWorkerPath, generatedSW);
   });
 

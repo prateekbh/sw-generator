@@ -14,29 +14,6 @@
  * limitations under the License.
  */
 
-import { ServiceWorkerConfiguration } from '../configuration';
-
-declare type BabelConfig = {
-  babelrc: Boolean;
-  plugins: Array<string | Array<any>>;
-};
-
-export default function({ assetCachingOptions }: ServiceWorkerConfiguration) {
-  const babelConfig: BabelConfig = {
-    babelrc: false,
-    plugins: [],
-  };
-
-  if (!assetCachingOptions || assetCachingOptions.length === 0) {
-    babelConfig.plugins.push([
-      'filter-imports',
-      {
-        imports: {
-          './asset-caching/index': ['cacheAssets'],
-        },
-      },
-    ]);
-  }
-
-  return babelConfig;
+export interface AmpSwModule {
+  init: Function;
 }

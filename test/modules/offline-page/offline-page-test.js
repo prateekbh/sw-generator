@@ -26,11 +26,14 @@ describe('Offline page module', function() {
   const serviceWorkerPath = join('test', 'offline-page-sw.js');
 
   before(async () => {
-    const generatedSW = await buildSW({
-      offlinePageOptions: {
-        url: 'http://localhost:6881/test/offline.html',
+    const generatedSW = await buildSW(
+      {
+        offlinePageOptions: {
+          url: 'http://localhost:6881/test/offline.html',
+        },
       },
-    });
+      '/test/dist/core.js',
+    );
     await writeFile(serviceWorkerPath, generatedSW);
   });
 

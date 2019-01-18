@@ -45,11 +45,14 @@ describe('Document caching module', function() {
   });
 
   it('should respect allowList config', async () => {
-    const generatedSW = await buildSW({
-      documentCachingOptions: {
-        allowList: [/alternate.amp.html/],
+    const generatedSW = await buildSW(
+      {
+        documentCachingOptions: {
+          allowList: [/alternate.amp.html/],
+        },
       },
-    });
+      '/test/dist/core.js',
+    );
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
     await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
@@ -75,11 +78,14 @@ describe('Document caching module', function() {
     expect(cachedData).to.be.null;
   });
   it('should respect denyList config', async () => {
-    const generatedSW = await buildSW({
-      documentCachingOptions: {
-        denyList: [/alternate.amp.html/],
+    const generatedSW = await buildSW(
+      {
+        documentCachingOptions: {
+          denyList: [/alternate.amp.html/],
+        },
       },
-    });
+      '/test/dist/core.js',
+    );
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
     await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
@@ -105,7 +111,7 @@ describe('Document caching module', function() {
     expect(cachedData).to.not.be.null;
   });
   it('should not cache non AMP pages', async () => {
-    const generatedSW = await buildSW();
+    const generatedSW = await buildSW({}, '/test/dist/core.js');
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
     await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
@@ -131,7 +137,7 @@ describe('Document caching module', function() {
   });
   it('should respond from cache if server does not respond', async () => {
     this.timeout(8000);
-    const generatedSW = await buildSW();
+    const generatedSW = await buildSW({}, '/test/dist/core.js');
     await writeFile(serviceWorkerPath, generatedSW);
     await driver.get('http://localhost:6881/test/index.html');
     await performCleanupAndWaitForSWActivation(driver, `/${serviceWorkerPath}`);
@@ -149,7 +155,7 @@ describe('Document caching module', function() {
 
   describe('cacheAMPDocument', function() {
     it('should be not cache the current page URL if its not AMP page', async () => {
-      const generatedSW = await buildSW();
+      const generatedSW = await buildSW({}, '/test/dist/core.js');
       await writeFile(serviceWorkerPath, generatedSW);
       await driver.get('http://localhost:6881/test/index.html');
       await performCleanupAndWaitForSWActivation(
@@ -170,7 +176,7 @@ describe('Document caching module', function() {
       expect(cachedData).to.be.null;
     });
     it('should be cache the current page URL if its not AMP page', async () => {
-      const generatedSW = await buildSW();
+      const generatedSW = await buildSW({}, '/test/dist/core.js');
       await writeFile(serviceWorkerPath, generatedSW);
       await driver.get('http://localhost:6881/test/alternate.amp.html');
       await driver.executeAsyncScript(cb => {
